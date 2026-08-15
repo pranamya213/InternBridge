@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - InternBridge{% endblock %}
+
+{% block content %}
+<section class="error-section">
+    <div class="ib-container text-center">
+        <div class="error-content">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">Page Not Found</h2>
+            <p class="error-msg">The page you are looking for doesn't exist or has been moved.</p>
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-4">Return Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

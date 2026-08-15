@@ -1,0 +1,99 @@
+/* ==========================================================================
+   Responsive Styles for InternBridge
+   ========================================================================== */
+
+/* Media Queries: Mobile First approach handled in main.css for base, these are max-width fallbacks where desktop-first was easier to write initially, but mostly adjusting layouts down. */
+
+/* Large Laptops / Desktops (Max 1200px) */
+@media (max-width: 1200px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+}
+
+/* Tablets (Max 991px) */
+@media (max-width: 991px) {
+    .hero-section {
+        padding: 6rem 0 4rem;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+}
+
+/* Mobile Devices (Max 767px) */
+@media (max-width: 767px) {
+    /* Navbar */
+    .mobile-toggle {
+        display: flex;
+    }
+    
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: var(--surface);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border-bottom: 1px solid var(--border);
+        gap: 1.5rem;
+    }
+    
+    .nav-links.active {
+        display: flex;
+    }
+    
+    .nav-actions {
+        margin-left: 0;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-actions .btn {
+        width: 100%;
+    }
+
+    /* Typography Adjustments */
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.75rem;
+    }
+    
+    /* Layout Adjustments */
+    .hero-actions {
+        flex-direction: column;
+    }
+    
+    .hero-actions .btn {
+        width: 100%;
+    }
+    
+    .workflow-split {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .workflow-card {
+        padding: 2rem 1.5rem;
+    }
+}

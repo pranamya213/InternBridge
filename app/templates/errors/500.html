@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Error - InternBridge{% endblock %}
+
+{% block content %}
+<section class="error-section">
+    <div class="ib-container text-center">
+        <div class="error-content">
+            <h1 class="error-code">500</h1>
+            <h2 class="error-title">Internal Server Error</h2>
+            <p class="error-msg">Something went wrong on our end. We are working to fix it.</p>
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-4">Return Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
