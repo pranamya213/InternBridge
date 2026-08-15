@@ -31,5 +31,11 @@ InternBridge is an intelligent internship and early-career recruitment platform 
    python run.py
    ```
 
-7. **Access the application**:
+7. **Create an Admin Account** (Optional for Phase 2):
+   ```bash
+   python create_admin.py
+   ```
+   Follow the prompts to enter an email, name, and secure password.
+
+8. **Access the application**:
    Open a browser and navigate to `http://localhost:5000`

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Company Dashboard | InternBridge{% endblock %}
+
+{% block content %}
+<section class="dashboard-section pt-5">
+    <div class="ib-container">
+        <div class="dashboard-header mb-5">
+            <h1>Welcome to InternBridge, {{ current_user.full_name }}</h1>
+            <p class="text-secondary">Company Dashboard</p>
+        </div>
+        
+        <div class="dashboard-placeholder card-gradient-border">
+            <div class="placeholder-content text-center py-5">
+                <div class="role-icon-large mb-3">🏢</div>
+                <h3>Your Dashboard is ready</h3>
+                <p>This is a placeholder to verify role-based access.</p>
+                <p>In the next phase, this will include role posting, talent discovery, and application management.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

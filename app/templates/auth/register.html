@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Join InternBridge{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container auth-wide">
+        <div class="auth-header">
+            <h2>Join InternBridge</h2>
+            <p>Who are you looking to connect as?</p>
+        </div>
+        
+        <div class="role-selection-grid mt-4">
+            <a href="{{ url_for('auth.register_student') }}" class="role-card">
+                <div class="role-icon">👨‍🎓</div>
+                <h3>Student</h3>
+                <p>Find internships, build your resume, and start your career.</p>
+                <span class="btn btn-outline mt-3">Join as Student</span>
+            </a>
+            
+            <a href="{{ url_for('auth.register_company') }}" class="role-card">
+                <div class="role-icon">🏢</div>
+                <h3>Company</h3>
+                <p>Post opportunities and discover exceptional early-career talent.</p>
+                <span class="btn btn-outline mt-3">Join as Company</span>
+            </a>
+        </div>
+        
+        <div class="auth-footer text-center mt-5">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

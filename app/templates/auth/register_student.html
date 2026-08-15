@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration | InternBridge{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-header text-center">
+            <div class="role-icon-small">👨‍🎓</div>
+            <h2>Create Student Account</h2>
+            <p>Start building your career today.</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.register_student') }}" class="auth-form mt-4">
+            <div class="form-group">
+                <label for="full_name">Full Name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="John Doe" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="you@university.edu" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <div class="password-input-wrapper">
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Min. 8 characters" required minlength="8">
+                    <button type="button" class="btn-toggle-password" aria-label="Toggle password visibility" onclick="const p=document.getElementById('password'); p.type=p.type==='password'?'text':'password';">
+                        👁️
+                    </button>
+                </div>
+                <small class="form-text">Must be at least 8 characters long.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                <div class="password-input-wrapper">
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirm your password" required minlength="8">
+                    <button type="button" class="btn-toggle-password" aria-label="Toggle confirm password visibility" onclick="const p=document.getElementById('confirm_password'); p.type=p.type==='password'?'text':'password';">
+                        👁️
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">Register as Student</button>
+        </form>
+        
+        <div class="auth-footer text-center mt-4">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

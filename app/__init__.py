@@ -6,12 +6,13 @@ from config import config
 # Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
-# login_manager.login_view = 'auth.login' # Uncomment when auth is implemented
+login_manager.login_view = 'auth.login'
+login_manager.login_message_category = 'warning'
 
 @login_manager.user_loader
 def load_user(user_id):
-    """Dummy user loader to prevent Flask-Login exception during foundation phase."""
-    return None
+    from app.models.user import User
+    return User.query.get(int(user_id))
 
 def create_app(config_name='default'):
     """Application factory pattern."""
@@ -28,6 +29,18 @@ def create_app(config_name='default'):
     from app.routes.main import main_bp
     app.register_blueprint(main_bp)
     
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/')
+
+    from app.routes.student import student_bp
+    app.register_blueprint(student_bp, url_prefix='/student')
+
+    from app.routes.company import company_bp
+    app.register_blueprint(company_bp, url_prefix='/company')
+
+    from app.routes.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    
     from app.routes.errors import errors_bp
     app.register_blueprint(errors_bp)
     
@@ -38,4 +51,9 @@ def create_app(config_name='default'):
     except OSError:
         pass
         
+    # Create database tables
+    with app.app_context():
+        from app import models  # Ensure models are imported
+        db.create_all()
+
     return app

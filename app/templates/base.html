@@ -36,12 +36,24 @@
             </button>
 
             <div class="nav-links" id="navLinks">
+                <a href="{{ url_for('main.home') }}" class="nav-link">Home</a>
                 <a href="#" class="nav-link">For Students</a>
                 <a href="#" class="nav-link">For Companies</a>
                 <a href="#" class="nav-link">About</a>
                 <div class="nav-actions">
-                    <a href="#" class="btn btn-outline">Login</a>
-                    <a href="#" class="btn btn-primary">Get Started</a>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'student' %}
+                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                        {% elif current_user.role == 'company' %}
+                            <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                        {% elif current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -49,6 +61,20 @@
 
     <!-- Main Content -->
     <main class="ib-main-content">
+        <!-- Flash Messages -->
+        <div class="flash-container ib-container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                            <button type="button" class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
         {% block content %}{% endblock %}
     </main>
 
