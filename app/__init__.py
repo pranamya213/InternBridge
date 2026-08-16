@@ -44,6 +44,9 @@ def create_app(config_name='default'):
     from app.routes.internships import internships_bp
     app.register_blueprint(internships_bp, url_prefix='/internships')
     
+    from app.routes.applications import applications_bp
+    app.register_blueprint(applications_bp)
+    
     from app.routes.errors import errors_bp
     app.register_blueprint(errors_bp)
     

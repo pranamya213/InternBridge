@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}{{ application.student.user.full_name }} | Applicant | InternBridge{% endblock %}
+
+{% block content %}
+<div class="bg-premium-gradient py-4" style="min-height: calc(100vh - 70px);">
+    <div class="ib-container">
+        
+        <div class="mb-4">
+            <a href="{{ url_for('applications.company_applicants', internship_id=application.internship.id) }}" class="text-decoration-none" style="color: #64748b; font-weight: 500;">
+                ← Back to Applicants for {{ application.internship.title }}
+            </a>
+        </div>
+        
+        <div class="row">
+            <!-- Left Column: Profile & Cover Letter -->
+            <div class="col-lg-8 mb-4">
+                
+                <!-- Profile Header Card -->
+                <div class="premium-card p-4 mb-4">
+                    <div class="d-flex align-items-center gap-4 mb-3">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #0ea5e9; font-weight: bold; flex-shrink: 0;">
+                            {{ application.student.user.full_name[0] }}
+                        </div>
+                        <div>
+                            <h2 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem;">{{ application.student.user.full_name }}</h2>
+                            <p style="color: #475569; font-size: 1.1rem; margin-bottom: 0.5rem;">{{ application.student.headline or 'Student' }}</p>
+                            <div class="d-flex flex-wrap gap-3 text-muted" style="font-size: 0.9rem;">
+                                <span>📧 {{ application.student.user.email }}</span>
+                                {% if application.student.phone %}<span>📱 {{ application.student.phone }}</span>{% endif %}
+                                {% if application.student.location %}<span>📍 {{ application.student.location }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if application.student.about_me %}
+                    <hr style="border-color: #e2e8f0; margin: 1.5rem 0;">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 0.75rem;">About</h5>
+                    <p style="color: #475569; line-height: 1.6; margin-bottom: 0;">{{ application.student.about_me }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Cover Letter -->
+                <div class="premium-card p-4 mb-4" style="border-left: 4px solid #3b82f6;">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 1rem;">Cover Letter</h5>
+                    {% if application.cover_letter %}
+                        <p style="white-space: pre-wrap; margin-bottom: 0; color: #334155; line-height: 1.7; font-size: 0.95rem;">{{ application.cover_letter }}</p>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-0">No cover letter provided.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Skills -->
+                {% if application.student.skills %}
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 1rem;">Skills</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in application.student.skills %}
+                        <span style="background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; padding: 0.4rem 1rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 500;">
+                            {{ skill.skill_name }} 
+                            {% if skill.proficiency %}
+                            <span class="text-muted ms-1" style="font-size: 0.75rem;">({{ skill.proficiency }})</span>
+                            {% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Education -->
+                {% if application.student.education %}
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 1.5rem;">Education</h5>
+                    {% for edu in application.student.education %}
+                    <div class="mb-{% if not loop.last %}4{% else %}0{% endif %}">
+                        <h6 style="color: #0f172a; font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem;">{{ edu.degree }} in {{ edu.field_of_study }}</h6>
+                        <p style="color: #475569; margin-bottom: 0.25rem;">{{ edu.institution }}</p>
+                        <div class="text-muted" style="font-size: 0.85rem;">
+                            {{ edu.start_year }} - {% if edu.currently_studying %}Present{% else %}{{ edu.end_year }}{% endif %}
+                            {% if edu.cgpa %}<span class="ms-3">CGPA: {{ edu.cgpa }}</span>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Experience -->
+                {% if application.student.experience %}
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 1.5rem;">Experience</h5>
+                    {% for exp in application.student.experience %}
+                    <div class="mb-{% if not loop.last %}4{% else %}0{% endif %}">
+                        <h6 style="color: #0f172a; font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem;">{{ exp.job_title }}</h6>
+                        <p style="color: #475569; margin-bottom: 0.25rem;">{{ exp.organization }}</p>
+                        <div class="text-muted mb-2" style="font-size: 0.85rem;">
+                            {{ exp.start_date.strftime('%b %Y') }} - {% if exp.currently_working %}Present{% else %}{{ exp.end_date.strftime('%b %Y') }}{% endif %}
+                        </div>
+                        {% if exp.description %}
+                        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 0; white-space: pre-wrap;">{{ exp.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Projects -->
+                {% if application.student.projects %}
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #1e293b; font-weight: 600; margin-bottom: 1.5rem;">Projects</h5>
+                    {% for proj in application.student.projects %}
+                    <div class="mb-{% if not loop.last %}4{% else %}0{% endif %} p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <h6 style="color: #0f172a; font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">{{ proj.name }}</h6>
+                        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 0.75rem; white-space: pre-wrap;">{{ proj.description }}</p>
+                        {% if proj.technologies %}
+                        <div class="text-muted mb-2" style="font-size: 0.8rem;">
+                            <strong>Tech:</strong> {{ proj.technologies }}
+                        </div>
+                        {% endif %}
+                        <div class="d-flex gap-3 mt-2" style="font-size: 0.85rem;">
+                            {% if proj.github_url %}<a href="{{ proj.github_url }}" target="_blank" class="text-decoration-none">GitHub Repo</a>{% endif %}
+                            {% if proj.live_demo_url %}<a href="{{ proj.live_demo_url }}" target="_blank" class="text-decoration-none">Live Demo</a>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+            </div>
+            
+            <!-- Right Column: Status & Notes -->
+            <div class="col-lg-4">
+                
+                <!-- Status Control -->
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #0f172a; font-weight: 600; margin-bottom: 1rem;">Application Status</h5>
+                    
+                    <div class="mb-4">
+                        <span class="status-badge status-{{ application.status|lower|replace(' ', '-') }} w-100 justify-content-center py-2" style="font-size: 1rem;">
+                            {{ application.status }}
+                        </span>
+                        <div class="text-center mt-2 text-muted" style="font-size: 0.8rem;">
+                            Applied: {{ application.applied_at.strftime('%b %d, %Y') }}
+                        </div>
+                    </div>
+                    
+                    {% if application.status not in ['Withdrawn', 'Accepted'] %}
+                    <hr style="border-color: #e2e8f0; margin: 1.5rem 0;">
+                    <form method="POST" action="{{ url_for('applications.company_update_status', application_id=application.id) }}">
+                        <label class="form-label text-muted" style="font-size: 0.85rem; font-weight: 600;">Update Status</label>
+                        <select name="status" class="form-select mb-3" style="border-radius: 0.5rem; border-color: #cbd5e1;">
+                            <option value="Applied" {% if application.status == 'Applied' %}selected{% endif %}>Applied</option>
+                            <option value="Under Review" {% if application.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                            <option value="Shortlisted" {% if application.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                            <option value="Accepted" {% if application.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="Rejected" {% if application.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100" style="border-radius: 0.5rem;">Update Status</button>
+                    </form>
+                    {% else %}
+                        <div class="alert alert-secondary mb-0 p-2 text-center" style="font-size: 0.85rem;">
+                            Status is final and cannot be changed.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Private Notes -->
+                <div class="premium-card p-4" style="background: #fffbeb; border-color: #fde68a;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span style="font-size: 1.2rem;">🔒</span>
+                        <h5 style="color: #92400e; font-weight: 600; margin-bottom: 0;">Private Notes</h5>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #b45309; margin-bottom: 1rem;">Only visible to your organization. The student cannot see this.</p>
+                    
+                    <form method="POST" action="{{ url_for('applications.company_update_notes', application_id=application.id) }}">
+                        <textarea class="form-control mb-3" name="company_notes" rows="6" placeholder="Add private evaluation notes here..." style="background: #fff; border-color: #fcd34d; font-size: 0.9rem; resize: vertical; border-radius: 0.5rem;">{{ application.company_notes or '' }}</textarea>
+                        <button type="submit" class="btn w-100" style="background: #f59e0b; color: white; font-weight: 500; border-radius: 0.5rem;">Save Private Notes</button>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

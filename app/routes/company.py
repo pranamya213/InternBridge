@@ -22,6 +22,7 @@ def dashboard():
     profile = CompanyProfile.query.filter_by(user_id=current_user.id).first()
     completion_percentage = 0
     internships_stats = {'total': 0, 'published': 0, 'draft': 0, 'closed': 0}
+    applicant_stats = {'total': 0, 'new': 0, 'reviewing': 0, 'shortlisted': 0}
     if profile:
         fields = [
             profile.company_name, profile.organization_type, profile.industry,
@@ -39,7 +40,15 @@ def dashboard():
         internships_stats['draft'] = sum(1 for i in internships if i.status == 'Draft')
         internships_stats['closed'] = sum(1 for i in internships if i.status == 'Closed')
         
-    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats)
+        # Calculate applicant stats
+        from app.models.application import Application
+        all_apps = Application.query.join(Internship).filter(Internship.company_profile_id == profile.id).all()
+        applicant_stats['total'] = len(all_apps)
+        applicant_stats['new'] = sum(1 for a in all_apps if a.status == 'Applied')
+        applicant_stats['reviewing'] = sum(1 for a in all_apps if a.status == 'Under Review')
+        applicant_stats['shortlisted'] = sum(1 for a in all_apps if a.status == 'Shortlisted')
+        
+    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats, applicant_stats=applicant_stats)
 
 @company_bp.route('/profile')
 @login_required

@@ -35,6 +35,8 @@ class Internship(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     published_at = db.Column(db.DateTime)
+    
+    applications = db.relationship('Application', backref='internship', lazy=True, cascade="all, delete-orphan")
 
     def set_required_skills(self, skills_list):
         self.required_skills_json = json.dumps(skills_list)

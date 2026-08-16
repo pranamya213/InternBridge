@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for {{ internship.title }} | InternBridge{% endblock %}
+
+{% block content %}
+<div class="bg-premium-gradient py-5" style="min-height: calc(100vh - 70px);">
+    <div class="ib-container">
+        
+        <div class="mb-4">
+            <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="text-decoration-none" style="color: #64748b; font-weight: 500;">
+                ← Back to Internship
+            </a>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <div class="premium-card p-5 mb-5">
+                    <h2 class="mb-2" style="color: #0f172a; font-weight: 700;">Application</h2>
+                    <h4 class="mb-4" style="color: #3b82f6;">{{ internship.title }} at {{ internship.company.company_name }}</h4>
+                    
+                    <hr class="mb-4" style="border-color: #e2e8f0;">
+                    
+                    <!-- Profile Summary -->
+                    <h5 class="mb-3" style="color: #1e293b; font-weight: 600;">Your Profile Summary</h5>
+                    <div class="p-4 mb-4" style="background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #0ea5e9; font-weight: bold; margin-right: 1rem;">
+                                {{ current_user.full_name[0] }}
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ current_user.full_name }}</h5>
+                                <p class="mb-0 text-muted" style="font-size: 0.9rem;">{{ student_profile.headline or 'No headline set' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <span class="text-muted" style="font-size: 0.85rem;">Email:</span> {{ current_user.email }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <span class="text-muted" style="font-size: 0.85rem;">Location:</span> {{ student_profile.location or 'Not specified' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <span class="text-muted" style="font-size: 0.85rem;">Skills:</span> {{ student_profile.skills|length }} listed
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <span class="text-muted" style="font-size: 0.85rem;">Projects:</span> {{ student_profile.projects|length }} listed
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mb-4" style="background: rgba(239, 246, 255, 0.7); border: 1px solid #bfdbfe;">
+                        <i class="me-2">💡</i> <strong>Note:</strong> Your full InternBridge profile (including education, skills, projects, and experience) will be shared securely with {{ internship.company.company_name }}. 
+                        <br><a href="{{ url_for('student.profile_edit') }}" class="text-decoration-none fw-bold mt-2 d-inline-block" target="_blank">Update My Profile →</a>
+                    </div>
+
+                    <!-- Application Form -->
+                    <form method="POST" action="{{ url_for('applications.student_apply', internship_id=internship.id) }}">
+                        
+                        <div class="mb-4">
+                            <label for="cover_letter" class="form-label" style="font-weight: 600; color: #1e293b;">Cover Letter / Message to Company</label>
+                            <p class="text-muted mb-2" style="font-size: 0.85rem;">Why are you interested in this internship and what makes you a good fit?</p>
+                            <textarea class="form-control" id="cover_letter" name="cover_letter" rows="6" maxlength="1500" required placeholder="Write your cover letter here..." style="resize: vertical; border-radius: 0.5rem;"></textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">Required</small>
+                                <small class="text-muted" id="char_count">0 / 1500</small>
+                            </div>
+                        </div>
+                        
+                        <hr class="mb-4" style="border-color: #e2e8f0;">
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-gradient btn-lg px-5">Submit Application</button>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const coverLetter = document.getElementById('cover_letter');
+        const charCount = document.getElementById('char_count');
+        
+        if (coverLetter && charCount) {
+            coverLetter.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                charCount.textContent = `${currentLength} / 1500`;
+                
+                if (currentLength > 1400) {
+                    charCount.style.color = '#ef4444'; // Red when close to limit
+                } else {
+                    charCount.style.color = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

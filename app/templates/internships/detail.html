@@ -160,11 +160,36 @@
                 </div>
             </div>
             
-            <!-- Future Application Area -->
-            <div class="apply-placeholder">
-                <div style="font-size: 2rem; margin-bottom: 1rem;">🚀</div>
-                <h4 style="color: #1e40af; margin-bottom: 0.5rem;">Application Feature Coming Soon</h4>
-                <p style="color: #3b82f6; margin-bottom: 0;">In the next phase of InternBridge, you will be able to apply directly to this position with your student profile.</p>
+            <!-- Application Area -->
+            <div class="apply-placeholder" style="background: transparent; border: none; padding: 0; margin-top: 2rem;">
+                {% if not current_user.is_authenticated %}
+                    <div class="p-4 bg-white rounded shadow-sm text-center border">
+                        <h5 class="mb-3">Ready to apply?</h5>
+                        <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary px-4">Login to Apply</a>
+                    </div>
+                {% elif current_user.role == 'student' %}
+                    {% if has_applied %}
+                        <div class="p-4 rounded text-center" style="background: #ecfdf5; border: 1px solid #a7f3d0;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                            <h5 style="color: #065f46; margin-bottom: 1rem;">Application Submitted</h5>
+                            <a href="{{ url_for('applications.student_application_detail', application_id=application_id) }}" class="btn btn-success">View Application</a>
+                        </div>
+                    {% elif internship.status == 'Closed' %}
+                        <div class="p-4 rounded text-center" style="background: #fef2f2; border: 1px solid #fecaca;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
+                            <h5 style="color: #991b1b; margin-bottom: 0;">Applications Closed</h5>
+                        </div>
+                    {% else %}
+                        {% if is_past_deadline %}
+                            <div class="p-4 rounded text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏰</div>
+                                <h5 style="color: #92400e; margin-bottom: 0;">Application Deadline Passed</h5>
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('applications.student_apply', internship_id=internship.id) }}" class="btn btn-gradient btn-lg w-100 py-3 shadow-sm" style="font-size: 1.1rem; font-weight: 600;">Apply Now</a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
 

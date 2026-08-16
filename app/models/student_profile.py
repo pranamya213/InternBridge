@@ -33,6 +33,7 @@ class StudentProfile(db.Model):
     certifications = db.relationship('Certification', backref='profile', cascade='all, delete-orphan')
     experience = db.relationship('Experience', backref='profile', cascade='all, delete-orphan')
     professional_links = db.relationship('ProfessionalLink', backref='profile', cascade='all, delete-orphan')
+    applications = db.relationship('Application', backref='student', lazy=True, cascade="all, delete-orphan")
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

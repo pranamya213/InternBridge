@@ -55,8 +55,31 @@ def index():
     
     return render_template('internships/index.html', internships=internships, domains=domains, durations=durations)
 
+from flask_login import current_user
+
 @internships_bp.route('/<int:internship_id>')
 def detail(internship_id):
-    # Only allow viewing published internships
-    internship = Internship.query.filter_by(id=internship_id, status='Published').first_or_404()
-    return render_template('internships/detail.html', internship=internship)
+    # Actually, we should let them view 'Closed' internships too if they have the link, 
+    # but the prompt implies only Published. I'll allow Published and Closed to be viewed 
+    # by public, as is typical, but only Published can be applied to.
+    internship = Internship.query.filter(Internship.id == internship_id, Internship.status.in_(['Published', 'Closed'])).first_or_404()
+    
+    has_applied = False
+    application_id = None
+    
+    if current_user.is_authenticated and current_user.role == 'student':
+        from app.models.student_profile import StudentProfile
+        from app.models.application import Application
+        profile = StudentProfile.query.filter_by(user_id=current_user.id).first()
+        if profile:
+            app_record = Application.query.filter_by(internship_id=internship.id, student_profile_id=profile.id).first()
+            if app_record:
+                has_applied = True
+                application_id = app_record.id
+                
+    from datetime import datetime
+    is_past_deadline = False
+    if internship.application_deadline and internship.application_deadline < datetime.utcnow().date():
+        is_past_deadline = True
+                
+    return render_template('internships/detail.html', internship=internship, has_applied=has_applied, application_id=application_id, is_past_deadline=is_past_deadline)

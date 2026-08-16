@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications | InternBridge{% endblock %}
+
+{% block content %}
+<div class="bg-premium-radial py-5" style="min-height: calc(100vh - 70px);">
+    <div class="ib-container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+            <div>
+                <h1 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;">My Applications</h1>
+                <p class="text-muted" style="font-size: 1.1rem;">Track the status of your internship applications.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('internships.index') }}" class="btn btn-gradient">Find More Internships</a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass-card mb-5 p-3" style="padding: 1rem !important;">
+            <div class="d-flex overflow-auto" style="gap: 0.5rem; white-space: nowrap; padding-bottom: 0.25rem;">
+                {% for status, count in stats.items() %}
+                <a href="{{ url_for('applications.student_applications', status=status if status != 'All' else None) }}" 
+                   class="btn btn-sm {% if current_filter == status %}btn-primary shadow-sm{% else %}btn-outline-secondary{% endif %}"
+                   style="border-radius: 20px; padding: 0.4rem 1rem;">
+                    {{ status }} <span class="badge {% if current_filter == status %}bg-white text-primary{% else %}bg-secondary text-white{% endif %} rounded-pill ms-1">{{ count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Applications List -->
+        {% if applications %}
+            <div class="row">
+                {% for app in applications %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="premium-card h-100 d-flex flex-column" style="position: relative; overflow: hidden;">
+                        
+                        <!-- Top Accent Line -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #8b5cf6);"></div>
+                        
+                        <div class="p-4 flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="status-badge status-{{ app.status|lower|replace(' ', '-') }} mb-2">{{ app.status }}</span>
+                                </div>
+                                <div style="width: 40px; height: 40px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #3b82f6;">
+                                    {{ app.internship.company.company_name[0]|upper }}
+                                </div>
+                            </div>
+                            
+                            <h4 class="mb-1" style="color: #0f172a; font-weight: 700; font-size: 1.25rem;">{{ app.internship.title }}</h4>
+                            <p class="mb-3" style="color: #475569; font-weight: 500;">{{ app.internship.company.company_name }}</p>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-3" style="font-size: 0.85rem; color: #64748b;">
+                                {% if app.internship.work_mode %}<span><i class="me-1">🏠</i>{{ app.internship.work_mode }}</span>{% endif %}
+                                {% if app.internship.duration %}<span class="border-start border-secondary ps-2"><i class="me-1">⏳</i>{{ app.internship.duration }}</span>{% endif %}
+                                {% if app.internship.stipend %}<span class="border-start border-secondary ps-2"><i class="me-1">💰</i>{{ app.internship.stipend }}</span>{% endif %}
+                            </div>
+                            
+                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Applied: {{ app.applied_at.strftime('%b %d, %Y') }}</p>
+                        </div>
+                        
+                        <div class="p-3 bg-light border-top" style="border-color: #f1f5f9 !important;">
+                            <a href="{{ url_for('applications.student_application_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm w-100" style="border-radius: 6px;">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="glass-card text-center py-5">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.8;">✨</div>
+                <h3 style="color: #0f172a; font-weight: 700;">No applications found</h3>
+                {% if current_filter == 'All' %}
+                    <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">You haven't applied to any internships yet. Your next opportunity could be waiting for you.</p>
+                    <a href="{{ url_for('internships.index') }}" class="btn btn-gradient px-4 py-2">Explore Internships</a>
+                {% else %}
+                    <p class="text-muted mb-4">You have no applications with the status "{{ current_filter }}".</p>
+                    <a href="{{ url_for('applications.student_applications') }}" class="btn btn-outline-primary">View All Applications</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

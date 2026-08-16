@@ -45,6 +45,7 @@
                         {% if current_user.role == 'student' %}
                             <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">Dashboard</a>
                             <a href="{{ url_for('student.profile_view') }}" class="btn btn-outline">My Profile</a>
+                            <a href="{{ url_for('applications.student_applications') }}" class="btn btn-outline">My Applications</a>
                             <a href="{{ url_for('internships.index') }}" class="btn btn-outline">Explore Internships</a>
                         {% elif current_user.role == 'company' %}
                             <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline">Dashboard</a>

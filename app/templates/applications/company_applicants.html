@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Applicants for {{ internship.title }} | InternBridge{% endblock %}
+
+{% block content %}
+<div class="bg-premium-radial py-5" style="min-height: calc(100vh - 70px);">
+    <div class="ib-container">
+        
+        <div class="mb-3">
+            <a href="{{ url_for('company.internships_list') }}" class="text-decoration-none" style="color: #64748b; font-weight: 500;">
+                ← Back to Internships
+            </a>
+        </div>
+        
+        <!-- Header Card -->
+        <div class="premium-card p-4 p-md-5 mb-4 border-0" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+                <div>
+                    <h5 class="text-muted mb-1" style="font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 0.8rem;">Applicant Dashboard</h5>
+                    <h2 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem;">{{ internship.title }}</h2>
+                    <div class="d-flex align-items-center gap-3 text-muted">
+                        <span class="status-badge {% if internship.status == 'Published' %}status-accepted{% else %}status-withdrawn{% endif %} px-2 py-1" style="font-size: 0.75rem;">
+                            {{ internship.status }}
+                        </span>
+                        <span style="font-size: 0.9rem;">Posted {{ internship.created_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="d-flex gap-4 p-3 bg-white rounded-3 shadow-sm" style="border: 1px solid #e2e8f0;">
+                    <div class="text-center px-2">
+                        <h3 class="mb-0 text-primary" style="font-weight: 700;">{{ stats['All'] }}</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.8rem; font-weight: 500;">Total</p>
+                    </div>
+                    <div class="text-center px-2 border-start border-light">
+                        <h3 class="mb-0 text-primary" style="font-weight: 700;">{{ stats['Applied'] }}</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.8rem; font-weight: 500;">New</p>
+                    </div>
+                    <div class="text-center px-2 border-start border-light">
+                        <h3 class="mb-0 text-primary" style="font-weight: 700;">{{ stats['Shortlisted'] }}</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.8rem; font-weight: 500;">Shortlisted</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="d-flex overflow-auto mb-4" style="gap: 0.5rem; white-space: nowrap; padding-bottom: 0.25rem;">
+            {% for status, count in stats.items() %}
+            <a href="{{ url_for('applications.company_applicants', internship_id=internship.id, status=status if status != 'All' else None) }}" 
+               class="btn btn-sm {% if current_filter == status %}btn-primary shadow-sm{% else %}bg-white border-light text-secondary{% endif %}"
+               style="border-radius: 20px; padding: 0.4rem 1.25rem; font-weight: 500;">
+                {{ status }} <span class="badge {% if current_filter == status %}bg-white text-primary{% else %}bg-light text-secondary border{% endif %} rounded-pill ms-2">{{ count }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Applicants List -->
+        {% if applications %}
+            <div class="row">
+                {% for app in applications %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="premium-card h-100 d-flex flex-column" style="position: relative; overflow: hidden; border-radius: 1rem;">
+                        
+                        <!-- Status Accent Strip -->
+                        {% set color_map = {'Applied': '#3b82f6', 'Under Review': '#8b5cf6', 'Shortlisted': '#06b6d4', 'Accepted': '#10b981', 'Rejected': '#ef4444', 'Withdrawn': '#64748b'} %}
+                        <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: {{ color_map[app.status] }};"></div>
+                        
+                        <div class="p-4 flex-grow-1 ps-5">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h4 class="mb-1" style="color: #0f172a; font-weight: 700; font-size: 1.15rem;">{{ app.student.user.full_name }}</h4>
+                                    <p class="mb-2 text-muted text-truncate" style="font-size: 0.9rem; max-width: 200px;">{{ app.student.headline or 'Student' }}</p>
+                                </div>
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #64748b; font-weight: bold;">
+                                    {{ app.student.user.full_name[0] }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="status-badge status-{{ app.status|lower|replace(' ', '-') }}">{{ app.status }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {% set skills = app.student.skills %}
+                                {% if skills %}
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for skill in skills[:3] %}
+                                        <span style="font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; color: #475569;">{{ skill.skill_name }}</span>
+                                        {% endfor %}
+                                        {% if skills|length > 3 %}
+                                        <span style="font-size: 0.75rem; color: #64748b; padding: 2px 4px;">+{{ skills|length - 3 }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted" style="font-size: 0.8rem;">No skills listed</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-muted" style="font-size: 0.85rem;">
+                                Applied: {{ app.applied_at.strftime('%b %d, %Y') }}
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 bg-light border-top d-flex gap-2" style="border-color: #f1f5f9 !important;">
+                            <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm flex-grow-1" style="border-radius: 6px;">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="glass-card text-center py-5">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.8;">👥</div>
+                <h3 style="color: #0f172a; font-weight: 700;">No applicants yet</h3>
+                {% if current_filter == 'All' %}
+                    <p class="text-muted mb-0" style="max-width: 500px; margin: 0 auto;">Once students apply to this internship, their applications will appear here.</p>
+                {% else %}
+                    <p class="text-muted mb-4">You have no applicants with the status "{{ current_filter }}".</p>
+                    <a href="{{ url_for('applications.company_applicants', internship_id=internship.id) }}" class="btn btn-outline-primary">View All Applicants</a>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock %}

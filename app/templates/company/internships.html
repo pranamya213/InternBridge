@@ -72,6 +72,12 @@
                             </form>
                             {% endif %}
                             
+                            {% if internship.status != 'Draft' %}
+                            <a href="{{ url_for('applications.company_applicants', internship_id=internship.id) }}" class="btn btn-sm btn-gradient ms-auto text-nowrap">
+                                👥 Applicants {% if internship.applications %}({{ internship.applications|length }}){% endif %}
+                            </a>
+                            {% endif %}
+                            
                             <form action="{{ url_for('company.internship_delete', internship_id=internship.id) }}" method="POST" class="d-inline ms-auto" onsubmit="return confirm('Are you sure you want to delete/archive this internship?');">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
