@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}{{ internship.title }} | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.detail-header-card {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    position: relative;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.section-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    border: 1px solid #e2e8f0;
+}
+.chip.required {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+.chip.preferred {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    <div class="mb-3">
+        <a href="{{ url_for('company.internships_list') }}" class="text-decoration-none" style="color: #64748b;">← Back to Internships</a>
+    </div>
+
+    <!-- Header -->
+    <div class="detail-header-card">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-2">
+                    {% if internship.status == 'Draft' %}
+                        <span class="badge bg-secondary mb-2">DRAFT</span>
+                    {% elif internship.status == 'Published' %}
+                        <span class="badge bg-success mb-2">PUBLISHED</span>
+                    {% elif internship.status == 'Closed' %}
+                        <span class="badge bg-danger mb-2">CLOSED</span>
+                    {% else %}
+                        <span class="badge bg-dark mb-2">{{ internship.status|upper }}</span>
+                    {% endif %}
+                </div>
+                <h1 class="mb-1" style="color: #0f172a; font-weight: 700;">{{ internship.title }}</h1>
+                <p class="mb-3" style="color: #334155; font-size: 1.1rem; font-weight: 500;">
+                    {{ internship.company.company_name }}
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-4 text-muted" style="font-size: 0.95rem;">
+                    {% if internship.category %}<span>💼 {{ internship.category }}</span>{% endif %}
+                    {% if internship.location %}<span>📍 {{ internship.location }}</span>{% endif %}
+                    {% if internship.work_mode %}<span>🏠 {{ internship.work_mode }}</span>{% endif %}
+                    {% if internship.duration %}<span>⏳ {{ internship.duration }}</span>{% endif %}
+                    {% if internship.stipend %}<span>💰 {{ internship.stipend }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end align-self-end mt-3 mt-md-0">
+                <div class="d-flex flex-column gap-2 align-items-md-end">
+                    <p class="mb-0" style="color: #1e293b; font-weight: 600;">{{ internship.openings or 'Multiple' }} openings</p>
+                    {% if internship.application_deadline %}
+                    <p class="mb-3" style="color: #dc2626; font-size: 0.9rem;">Deadline: {{ internship.application_deadline.strftime('%B %d, %Y') }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <a href="{{ url_for('company.internship_edit', internship_id=internship.id) }}" class="btn btn-primary" style="background-color: #2563eb;">Edit Internship</a>
+                        {% if internship.status == 'Draft' %}
+                        <form action="{{ url_for('company.internship_publish', internship_id=internship.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-success text-white">Publish</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- About -->
+            <div class="section-card">
+                <h4 style="color: #1e293b; margin-bottom: 1rem;">About the Internship</h4>
+                {% if internship.description %}
+                    <p style="white-space: pre-wrap; color: #475569; line-height: 1.6;">{{ internship.description }}</p>
+                {% else %}
+                    <p class="text-muted">No description provided.</p>
+                {% endif %}
+            </div>
+
+            <!-- Responsibilities -->
+            <div class="section-card">
+                <h4 style="color: #1e293b; margin-bottom: 1rem;">Responsibilities</h4>
+                {% if internship.responsibilities %}
+                    <p style="white-space: pre-wrap; color: #475569; line-height: 1.6;">{{ internship.responsibilities }}</p>
+                {% else %}
+                    <p class="text-muted">Not specified.</p>
+                {% endif %}
+            </div>
+
+            <!-- Qualifications & Eligibility -->
+            <div class="section-card">
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Qualifications</h4>
+                        {% if internship.qualifications %}
+                            <p style="white-space: pre-wrap; color: #475569; line-height: 1.6;">{{ internship.qualifications }}</p>
+                        {% else %}
+                            <p class="text-muted">Not specified.</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Eligibility</h4>
+                        {% if internship.eligibility %}
+                            <p style="white-space: pre-wrap; color: #475569; line-height: 1.6;">{{ internship.eligibility }}</p>
+                        {% else %}
+                            <p class="text-muted">Not specified.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Skills -->
+            <div class="section-card">
+                <h4 style="color: #1e293b; margin-bottom: 1rem; font-size: 1.1rem;">Required Skills</h4>
+                {% set req_skills = internship.get_required_skills() %}
+                {% if req_skills %}
+                    <div class="mb-4">
+                        {% for skill in req_skills %}
+                        <span class="chip required">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-4">Not specified.</p>
+                {% endif %}
+
+                <h4 style="color: #1e293b; margin-bottom: 1rem; font-size: 1.1rem;">Preferred Skills</h4>
+                {% set pref_skills = internship.get_preferred_skills() %}
+                {% if pref_skills %}
+                    <div>
+                        {% for skill in pref_skills %}
+                        <span class="chip preferred">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Not specified.</p>
+                {% endif %}
+            </div>
+
+            <!-- Benefits -->
+            <div class="section-card">
+                <h4 style="color: #1e293b; margin-bottom: 1rem; font-size: 1.1rem;">Benefits</h4>
+                {% if internship.benefits %}
+                    <p style="white-space: pre-wrap; color: #475569; line-height: 1.6; margin-bottom: 0;">{{ internship.benefits }}</p>
+                {% else %}
+                    <p class="text-muted mb-0">Not specified.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

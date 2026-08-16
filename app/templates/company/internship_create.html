@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Create Internship | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+.form-section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+.form-label {
+    font-weight: 500;
+    color: #334155;
+}
+.form-control, .form-select {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('company.internships_list') }}" class="text-decoration-none" style="color: #64748b;">← Back to Internships</a>
+        <h1 class="mt-2" style="color: #0f172a;">Create Internship Opportunity</h1>
+        <p class="text-muted">Fill out the details below to post a new internship.</p>
+    </div>
+
+    <form action="{{ url_for('company.internship_create') }}" method="POST">
+        
+        <!-- 1. Internship Overview -->
+        <div class="form-section-card">
+            <div class="form-section-header">
+                <h3 class="m-0">1. Internship Overview</h3>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Internship Title *</label>
+                <input type="text" name="title" class="form-control" maxlength="150" required placeholder="e.g., Python Developer Intern">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Short Description</label>
+                <input type="text" name="short_description" class="form-control" maxlength="255" placeholder="A one-sentence summary for the preview card.">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Full Description</label>
+                <textarea name="description" class="form-control" rows="5" placeholder="Detail the day-to-day work, learning opportunities, and project context."></textarea>
+            </div>
+        </div>
+
+        <!-- 2. Role & Domain -->
+        <div class="form-section-card">
+            <div class="form-section-header">
+                <h3 class="m-0">2. Role & Domain</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Category / Domain</label>
+                    <select name="category" class="form-select">
+                        <option value="">Select Domain</option>
+                        {% set domains = ['Web Development', 'Mobile Development', 'Python Development', 'Java Development', 'Artificial Intelligence', 'Machine Learning', 'Data Science', 'Data Analytics', 'Cybersecurity', 'Cloud Computing', 'UI/UX Design', 'Digital Marketing', 'Finance', 'Human Resources', 'Content & Writing', 'Business Development', 'Other'] %}
+                        {% for dom in domains %}
+                        <option value="{{ dom }}">{{ dom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Internship Type</label>
+                    <select name="internship_type" class="form-select">
+                        <option value="Internship">Internship</option>
+                        <option value="Part-time Internship">Part-time Internship</option>
+                        <option value="Full-time Internship">Full-time Internship</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Number of Openings</label>
+                    <input type="number" name="openings" class="form-control" min="1" placeholder="e.g., 2">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Application Deadline</label>
+                    <input type="date" name="application_deadline" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Work Arrangement -->
+        <div class="form-section-card">
+            <div class="form-section-header">
+                <h3 class="m-0">3. Work Arrangement</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Work Mode</label>
+                    <select name="work_mode" class="form-select">
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="On-site">On-site</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Location (City, State, Country)</label>
+                    <input type="text" name="location" class="form-control" placeholder="e.g., Bangalore, India">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Duration</label>
+                    <select name="duration" class="form-select">
+                        <option value="">Select Duration</option>
+                        <option value="1–3 months">1–3 months</option>
+                        <option value="3–6 months">3–6 months</option>
+                        <option value="6+ months">6+ months</option>
+                        <option value="Flexible">Flexible</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Compensation -->
+        <div class="form-section-card">
+            <div class="form-section-header">
+                <h3 class="m-0">4. Compensation & Benefits</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Stipend Type</label>
+                    <select name="stipend_type" class="form-select">
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Performance-based">Performance-based</option>
+                        <option value="Negotiable">Negotiable</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Stipend Amount (if applicable)</label>
+                    <input type="text" name="stipend" class="form-control" placeholder="e.g., ₹10,000/month">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Benefits</label>
+                <textarea name="benefits" class="form-control" rows="3" placeholder="e.g., Certificate, Mentorship, Letter of recommendation"></textarea>
+            </div>
+        </div>
+
+        <!-- 5. Requirements -->
+        <div class="form-section-card">
+            <div class="form-section-header">
+                <h3 class="m-0">5. Requirements</h3>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Eligibility</label>
+                <textarea name="eligibility" class="form-control" rows="2" placeholder="e.g., Final-year B.Tech students"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Required Skills</label>
+                    <input type="text" name="required_skills" class="form-control" placeholder="e.g., Python, SQL, Git (comma separated)">
+                    <small class="text-muted">Used for intelligent matching later.</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Preferred Skills</label>
+                    <input type="text" name="preferred_skills" class="form-control" placeholder="e.g., Pandas, Django (comma separated)">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Responsibilities</label>
+                <textarea name="responsibilities" class="form-control" rows="3" placeholder="What will the intern do?"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Qualifications</label>
+                <textarea name="qualifications" class="form-control" rows="3" placeholder="Any specific qualifications needed?"></textarea>
+            </div>
+        </div>
+
+        <!-- Submit Actions -->
+        <div class="d-flex gap-3 mb-5">
+            <button type="submit" name="action" value="draft" class="btn btn-outline-secondary px-4 py-2">Save as Draft</button>
+            <button type="submit" name="action" value="publish" class="btn btn-primary px-4 py-2" style="background-color: #2563eb;">Publish Internship</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

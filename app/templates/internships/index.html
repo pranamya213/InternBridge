@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Internships | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 1.5rem 1.5rem;
+}
+
+.search-input-group {
+    background: white;
+    border-radius: 3rem;
+    padding: 0.5rem;
+    display: flex;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.search-input-group input {
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 3rem;
+    flex-grow: 1;
+    font-size: 1.1rem;
+    outline: none;
+}
+.search-input-group button {
+    border-radius: 3rem;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+.filter-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    top: 100px;
+}
+
+.internship-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.internship-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+.internship-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    opacity: 0.8;
+}
+
+.company-logo-sm {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #3b82f6;
+    border: 1px solid #e2e8f0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0.2rem 0.2rem 0 0;
+    border: 1px solid #e2e8f0;
+}
+
+.meta-info {
+    font-size: 0.9rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="search-header">
+    <div class="ib-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="mb-3" style="color: white;">Find Your Next Internship</h1>
+                <p class="mb-4 text-light" style="opacity: 0.9;">Discover opportunities that match your skills and career goals.</p>
+                
+                <form action="{{ url_for('internships.index') }}" method="GET">
+                    <!-- Preserve existing filters -->
+                    {% if request.args.get('work_mode') %}<input type="hidden" name="work_mode" value="{{ request.args.get('work_mode') }}">{% endif %}
+                    {% if request.args.get('domain') %}<input type="hidden" name="domain" value="{{ request.args.get('domain') }}">{% endif %}
+                    {% if request.args.get('duration') %}<input type="hidden" name="duration" value="{{ request.args.get('duration') }}">{% endif %}
+                    {% if request.args.get('sort_by') %}<input type="hidden" name="sort_by" value="{{ request.args.get('sort_by') }}">{% endif %}
+                    
+                    <div class="search-input-group">
+                        <input type="text" name="search" placeholder="Search by title, skill, or company..." value="{{ request.args.get('search', '') }}">
+                        <button type="submit" class="btn btn-primary" style="background-color: #2563eb;">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ib-container pb-5">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-card">
+                <h5 class="mb-4" style="color: #0f172a; font-weight: 700;">Filters</h5>
+                
+                <form action="{{ url_for('internships.index') }}" method="GET">
+                    <!-- Preserve search -->
+                    {% if request.args.get('search') %}<input type="hidden" name="search" value="{{ request.args.get('search') }}">{% endif %}
+                    
+                    <!-- Sort By -->
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Sort By</label>
+                        <select name="sort_by" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="newest" {% if request.args.get('sort_by') == 'newest' %}selected{% endif %}>Newest First</option>
+                            <option value="deadline_soonest" {% if request.args.get('sort_by') == 'deadline_soonest' %}selected{% endif %}>Deadline Soonest</option>
+                            <option value="recently_updated" {% if request.args.get('sort_by') == 'recently_updated' %}selected{% endif %}>Recently Updated</option>
+                        </select>
+                    </div>
+
+                    <!-- Work Mode -->
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Work Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="work_mode" value="" id="mode_all" {% if not request.args.get('work_mode') %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="mode_all">All</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="work_mode" value="Remote" id="mode_remote" {% if request.args.get('work_mode') == 'Remote' %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="mode_remote">Remote</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="work_mode" value="Hybrid" id="mode_hybrid" {% if request.args.get('work_mode') == 'Hybrid' %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="mode_hybrid">Hybrid</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="work_mode" value="On-site" id="mode_onsite" {% if request.args.get('work_mode') == 'On-site' %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="mode_onsite">On-site</label>
+                        </div>
+                    </div>
+
+                    <!-- Domain -->
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Domain</label>
+                        <select name="domain" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All Domains</option>
+                            {% for d in domains %}
+                                <option value="{{ d }}" {% if request.args.get('domain') == d %}selected{% endif %}>{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Duration</label>
+                        <select name="duration" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All Durations</option>
+                            {% for dur in durations %}
+                                <option value="{{ dur }}" {% if request.args.get('duration') == dur %}selected{% endif %}>{{ dur }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <a href="{{ url_for('internships.index') }}" class="btn btn-outline-secondary btn-sm w-100">Clear Filters</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Internship Listings -->
+        <div class="col-lg-9">
+            
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <h4 style="color: #0f172a; margin: 0;">{{ internships|length }} Opportunities Found</h4>
+            </div>
+
+            {% if internships %}
+                {% for internship in internships %}
+                <div class="internship-card">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="d-flex gap-3 mb-3">
+                                <div class="company-logo-sm">
+                                    {{ internship.company.company_name[0]|upper }}
+                                </div>
+                                <div>
+                                    <h3 class="mb-1" style="color: #0f172a; font-weight: 700; font-size: 1.4rem;">
+                                        <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="text-decoration-none text-dark">{{ internship.title }}</a>
+                                    </h3>
+                                    <p class="mb-0 text-muted" style="font-size: 1rem; font-weight: 500;">
+                                        {{ internship.company.company_name }}
+                                        {% if internship.category %} <span class="ms-2" style="font-size: 0.9rem; font-weight: 400;">• {{ internship.category }}</span> {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                {% if internship.location %}
+                                <div class="meta-info"><span>📍</span> {{ internship.location }}</div>
+                                {% endif %}
+                                {% if internship.work_mode %}
+                                <div class="meta-info"><span>🏠</span> {{ internship.work_mode }}</div>
+                                {% endif %}
+                                {% if internship.duration %}
+                                <div class="meta-info"><span>⏳</span> {{ internship.duration }}</div>
+                                {% endif %}
+                                {% if internship.stipend %}
+                                <div class="meta-info"><span>💰</span> {{ internship.stipend }}</div>
+                                {% endif %}
+                            </div>
+
+                            {% set skills = internship.get_required_skills() %}
+                            {% if skills %}
+                            <div class="mb-3">
+                                {% for skill in skills[:5] %}
+                                <span class="chip">{{ skill }}</span>
+                                {% endfor %}
+                                {% if skills|length > 5 %}
+                                <span class="chip" style="background: transparent;">+{{ skills|length - 5 }} more</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 d-flex flex-column align-items-md-end justify-content-between mt-3 mt-md-0 border-start-md border-light">
+                            <div class="text-md-end mb-3">
+                                {% if internship.application_deadline %}
+                                <p class="mb-1" style="font-size: 0.85rem; color: #475569;">Apply by</p>
+                                <p class="mb-0" style="font-weight: 600; color: #dc2626; font-size: 0.95rem;">{{ internship.application_deadline.strftime('%b %d, %Y') }}</p>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="btn btn-outline-primary mt-auto w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card p-5 text-center" style="border-radius: 1rem; border: 1px dashed #cbd5e1; background: #f8fafc;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✦</div>
+                    <h3 style="color: #1e293b;">No internships found</h3>
+                    <p class="text-muted mb-4">Try adjusting your search or filters to find what you're looking for.</p>
+                    <a href="{{ url_for('internships.index') }}" class="btn btn-outline-secondary">Clear All Filters</a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,12 +15,26 @@
             </div>
         </div>
         
-        <div class="dashboard-placeholder card-gradient-border">
-            <div class="placeholder-content text-center py-5">
-                <div class="role-icon-large mb-3">👨‍🎓</div>
-                <h3>Your Dashboard is ready</h3>
-                <p>This is a placeholder to verify role-based access.</p>
-                <p>In the next phase, this will include internship discovery, applications, and your resume builder.</p>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card p-4 h-100 text-center" style="border-radius: 1rem; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3 style="color: #0f172a;">Find your next opportunity</h3>
+                    <p class="text-muted mb-4">Explore internships that match your interests and skills.</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('internships.index') }}" class="btn btn-primary w-100" style="background-color: #2563eb;">Explore Internships</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="dashboard-placeholder card-gradient-border h-100">
+                    <div class="placeholder-content text-center py-5">
+                        <div class="role-icon-large mb-3">👨‍🎓</div>
+                        <h3>Your Dashboard</h3>
+                        <p>In future phases, this will include your applications and resume builder.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

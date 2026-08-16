@@ -4,4 +4,4 @@ from app.models.student_profile import (
     Certification, Experience, ProfessionalLink
 )
 from app.models.company_profile import CompanyProfile
-
+from app.models.internship import Internship

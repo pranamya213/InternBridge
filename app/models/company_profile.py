@@ -39,6 +39,7 @@ class CompanyProfile(db.Model):
 
     # Relationships
     user = db.relationship('User', backref=db.backref('company_profile', uselist=False))
+    internships = db.relationship('Internship', backref='company', lazy=True, cascade="all, delete-orphan")
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

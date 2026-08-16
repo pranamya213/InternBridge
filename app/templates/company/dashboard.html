@@ -47,12 +47,41 @@
             </div>
 
             <div class="col-md-8 mb-4">
-                <div class="dashboard-placeholder card-gradient-border h-100">
-                    <div class="placeholder-content text-center py-5">
-                        <div class="role-icon-large mb-3">🏢</div>
-                        <h3>Your Dashboard is ready</h3>
-                        <p>This is a placeholder to verify role-based access.</p>
-                        <p>In the next phase, this will include role posting, talent discovery, and application management.</p>
+                <div class="card p-4 h-100" style="border-radius: 1rem; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 style="color: #0f172a; font-weight: 700; margin: 0;">My Internships</h4>
+                        <a href="{{ url_for('company.internship_create') }}" class="btn btn-primary btn-sm" style="background-color: #2563eb;">+ Create Internship</a>
+                    </div>
+                    
+                    <div class="row text-center mb-4 g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="p-3" style="background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                                <h3 class="mb-1" style="color: #0f172a;">{{ stats.total if stats else 0 }}</h3>
+                                <p class="text-muted mb-0" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Total</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3" style="background: #ecfdf5; border-radius: 0.75rem; border: 1px solid #d1fae5;">
+                                <h3 class="mb-1" style="color: #059669;">{{ stats.published if stats else 0 }}</h3>
+                                <p class="mb-0" style="color: #059669; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Published</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3" style="background: #f1f5f9; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                                <h3 class="mb-1" style="color: #475569;">{{ stats.draft if stats else 0 }}</h3>
+                                <p class="mb-0" style="color: #475569; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Drafts</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3" style="background: #fef2f2; border-radius: 0.75rem; border: 1px solid #fee2e2;">
+                                <h3 class="mb-1" style="color: #dc2626;">{{ stats.closed if stats else 0 }}</h3>
+                                <p class="mb-0" style="color: #dc2626; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('company.internships_list') }}" class="btn btn-outline-secondary w-100">View All Internships</a>
                     </div>
                 </div>
             </div>

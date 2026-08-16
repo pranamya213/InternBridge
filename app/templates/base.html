@@ -45,9 +45,11 @@
                         {% if current_user.role == 'student' %}
                             <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">Dashboard</a>
                             <a href="{{ url_for('student.profile_view') }}" class="btn btn-outline">My Profile</a>
+                            <a href="{{ url_for('internships.index') }}" class="btn btn-outline">Explore Internships</a>
                         {% elif current_user.role == 'company' %}
                             <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline">Dashboard</a>
                             <a href="{{ url_for('company.profile_view') }}" class="btn btn-outline">My Company Profile</a>
+                            <a href="{{ url_for('company.internships_list') }}" class="btn btn-outline">My Internships</a>
                         {% elif current_user.role == 'admin' %}
                             <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Dashboard</a>
                         {% endif %}
