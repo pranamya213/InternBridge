@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.edit-section-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.edit-section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-control, .form-select {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-add {
+    background-color: #f1f5f9;
+    color: #3b82f6;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    width: 100%;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-add:hover {
+    background-color: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+.item-list-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Modal styling for basic JS-free feel or bootstrap modals if preferred. I'll use simple visible forms instead of modals to keep it robust and JS-light. */
+.add-form-container {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    margin-top: 1rem;
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('student.profile_view') }}" class="text-decoration-none" style="color: #64748b;">← Back to Profile</a>
+        <h1 class="mt-2" style="color: #0f172a;">Edit Profile</h1>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3 d-none d-md-block">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="list-group">
+                    <a href="#basic" class="list-group-item list-group-item-action border-0">Basic Info</a>
+                    <a href="#about" class="list-group-item list-group-item-action border-0">About Me</a>
+                    <a href="#preferences" class="list-group-item list-group-item-action border-0">Career Goals</a>
+                    <a href="#education" class="list-group-item list-group-item-action border-0">Education</a>
+                    <a href="#skills" class="list-group-item list-group-item-action border-0">Skills</a>
+                    <a href="#projects" class="list-group-item list-group-item-action border-0">Projects</a>
+                    <a href="#experience" class="list-group-item list-group-item-action border-0">Experience</a>
+                    <a href="#certifications" class="list-group-item list-group-item-action border-0">Certifications</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form Area -->
+        <div class="col-md-9">
+            
+            <!-- Basic Info -->
+            <div class="edit-section-card" id="basic">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Basic Information</h3>
+                </div>
+                <form action="{{ url_for('student.edit_basic_info') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Professional Headline</label>
+                        <input type="text" name="headline" class="form-control" value="{{ profile.headline or '' }}" maxlength="100" placeholder="e.g., MCA Student | Python Developer">
+                        <small class="text-muted">Max 100 characters.</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone" class="form-control" value="{{ profile.phone or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="location" class="form-control" value="{{ profile.location or '' }}" placeholder="e.g., Bangalore, India">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date of Birth (Optional)</label>
+                        <input type="date" name="dob" class="form-control" value="{{ profile.dob.strftime('%Y-%m-%d') if profile.dob else '' }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Basic Info</button>
+                </form>
+            </div>
+
+            <!-- About -->
+            <div class="edit-section-card" id="about">
+                <div class="edit-section-header">
+                    <h3 class="m-0">About Me</h3>
+                </div>
+                <form action="{{ url_for('student.edit_about') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Professional Summary</label>
+                        <textarea name="about_me" class="form-control" rows="5" placeholder="I am an MCA student passionate about... ">{{ profile.about_me or '' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save About Me</button>
+                </form>
+            </div>
+
+            <!-- Career Goals / Preferences -->
+            <div class="edit-section-card" id="preferences">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Career Goals & Preferences</h3>
+                </div>
+                <form action="{{ url_for('student.edit_preferences') }}" method="POST">
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Interested Roles (Select multiple)</label>
+                        <div class="row">
+                            {% set common_roles = ['Software Developer', 'Web Developer', 'Full Stack Developer', 'Python Developer', 'Java Developer', 'Data Analyst', 'Data Scientist', 'Machine Learning Engineer', 'UI/UX Designer'] %}
+                            {% set current_roles = profile.career_interests|map(attribute='role_name')|list %}
+                            
+                            {% for role in common_roles %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles" value="{{ role }}" id="role_{{ loop.index }}" {% if role in current_roles %}checked{% endif %}>
+                                    <label class="form-check-label" for="role_{{ loop.index }}">{{ role }}</label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label text-muted" style="font-size: 0.9rem;">Other Role</label>
+                            <input type="text" name="custom_role" class="form-control form-control-sm" placeholder="Add custom role">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Preferred Work Mode</label>
+                        {% set current_modes = profile.get_work_modes() %}
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="work_modes" value="On-site" id="mode_onsite" {% if 'On-site' in current_modes %}checked{% endif %}>
+                                <label class="form-check-label" for="mode_onsite">On-site</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="work_modes" value="Hybrid" id="mode_hybrid" {% if 'Hybrid' in current_modes %}checked{% endif %}>
+                                <label class="form-check-label" for="mode_hybrid">Hybrid</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="work_modes" value="Remote" id="mode_remote" {% if 'Remote' in current_modes %}checked{% endif %}>
+                                <label class="form-check-label" for="mode_remote">Remote</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Career Goals</button>
+                </form>
+            </div>
+
+            <!-- Education -->
+            <div class="edit-section-card" id="education">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Education</h3>
+                </div>
+                
+                <!-- Existing List -->
+                {% for edu in profile.education %}
+                <div class="item-list-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">{{ edu.degree }} in {{ edu.field_of_study }}</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ edu.institution }} | {{ edu.start_year }} - {% if edu.currently_studying %}Present{% else %}{{ edu.end_year }}{% endif %}</p>
+                    </div>
+                    <form action="{{ url_for('student.delete_education', id=edu.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+                
+                <button type="button" class="btn-add mt-2" onclick="document.getElementById('form-education').style.display='block'; this.style.display='none';">+ Add Education</button>
+                
+                <!-- Add Form -->
+                <div class="add-form-container" id="form-education">
+                    <h5 class="mb-3">Add Education</h5>
+                    <form action="{{ url_for('student.add_education') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Degree (e.g., MCA, B.Tech)</label>
+                            <input type="text" name="degree" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Institution / University</label>
+                            <input type="text" name="institution" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Field of Study</label>
+                            <input type="text" name="field_of_study" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Year</label>
+                                <input type="number" name="start_year" class="form-control" min="1950" max="2050" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Year</label>
+                                <input type="number" name="end_year" class="form-control" min="1950" max="2050">
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="currently_studying" value="1" id="currently_studying">
+                            <label class="form-check-label" for="currently_studying">I am currently studying here</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">CGPA / Percentage (Optional)</label>
+                            <input type="text" name="cgpa" class="form-control">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Save Education</button>
+                            <button type="button" class="btn btn-outline text-muted border-0" onclick="document.getElementById('form-education').style.display='none'; document.querySelector('#education .btn-add').style.display='block';">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="edit-section-card" id="skills">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Skills</h3>
+                </div>
+                
+                <div class="d-flex flex-wrap mb-3">
+                    {% for skill in profile.skills %}
+                    <div class="item-list-card py-1 px-3 d-inline-flex align-items-center gap-2 m-1">
+                        <span style="font-weight: 500;">{{ skill.skill_name }}</span>
+                        {% if skill.proficiency %}<span class="text-muted" style="font-size: 0.75rem;">({{ skill.proficiency }})</span>{% endif %}
+                        <form action="{{ url_for('student.delete_skill', id=skill.id) }}" method="POST" style="display: inline; margin-left: 10px;">
+                            <button type="submit" class="btn btn-sm text-danger p-0 border-0 bg-transparent" title="Remove">×</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" class="btn-add mt-2" onclick="document.getElementById('form-skill').style.display='block'; this.style.display='none';">+ Add Skill</button>
+
+                <!-- Add Form -->
+                <div class="add-form-container" id="form-skill">
+                    <form action="{{ url_for('student.add_skill') }}" method="POST" class="row align-items-end">
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label">Skill Name (e.g., Python)</label>
+                            <input type="text" name="skill_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Proficiency</label>
+                            <select name="proficiency" class="form-select">
+                                <option value="">Select (Optional)</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                        </div>
+                        <div class="col-12 mt-2">
+                             <button type="button" class="btn btn-outline btn-sm text-muted border-0" onclick="document.getElementById('form-skill').style.display='none'; document.querySelector('#skills .btn-add').style.display='block';">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Projects -->
+            <div class="edit-section-card" id="projects">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Projects</h3>
+                </div>
+
+                {% for project in profile.projects %}
+                <div class="item-list-card">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-1">{{ project.name }}</h6>
+                        <form action="{{ url_for('student.delete_project', id=project.id) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
+                        </form>
+                    </div>
+                    <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ project.description[:100] }}...</p>
+                </div>
+                {% endfor %}
+
+                <button type="button" class="btn-add mt-2" onclick="document.getElementById('form-project').style.display='block'; this.style.display='none';">+ Add Project</button>
+                
+                <div class="add-form-container" id="form-project">
+                    <h5 class="mb-3">Add Project</h5>
+                    <form action="{{ url_for('student.add_project') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Project Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Technologies Used</label>
+                            <input type="text" name="technologies" class="form-control" placeholder="e.g., Python, Flask, HTML">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">GitHub URL (Optional)</label>
+                                <input type="url" name="github_url" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Live Demo URL (Optional)</label>
+                                <input type="url" name="live_demo_url" class="form-control">
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Save Project</button>
+                            <button type="button" class="btn btn-outline text-muted border-0" onclick="document.getElementById('form-project').style.display='none'; document.querySelector('#projects .btn-add').style.display='block';">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="edit-section-card" id="experience">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Experience</h3>
+                </div>
+
+                {% for exp in profile.experience %}
+                <div class="item-list-card d-flex justify-content-between">
+                    <div>
+                        <h6 class="mb-1">{{ exp.job_title }} at {{ exp.organization }}</h6>
+                    </div>
+                    <form action="{{ url_for('student.delete_experience', id=exp.id) }}" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete experience?')">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+
+                <button type="button" class="btn-add mt-2" onclick="document.getElementById('form-experience').style.display='block'; this.style.display='none';">+ Add Experience</button>
+                
+                <div class="add-form-container" id="form-experience">
+                    <h5 class="mb-3">Add Experience</h5>
+                    <form action="{{ url_for('student.add_experience') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Job/Role Title</label>
+                            <input type="text" name="job_title" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Organization/Company</label>
+                            <input type="text" name="organization" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="currently_working" value="1" id="currently_working">
+                            <label class="form-check-label" for="currently_working">I am currently working here</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description (Optional)</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Save Experience</button>
+                            <button type="button" class="btn btn-outline text-muted border-0" onclick="document.getElementById('form-experience').style.display='none'; document.querySelector('#experience .btn-add').style.display='block';">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Certifications -->
+            <div class="edit-section-card" id="certifications">
+                <div class="edit-section-header">
+                    <h3 class="m-0">Certifications</h3>
+                </div>
+
+                {% for cert in profile.certifications %}
+                <div class="item-list-card d-flex justify-content-between">
+                    <div>
+                        <h6 class="mb-1">{{ cert.name }}</h6>
+                        <p class="mb-0 text-muted" style="font-size: 0.85rem;">{{ cert.organization }}</p>
+                    </div>
+                    <form action="{{ url_for('student.delete_certification', id=cert.id) }}" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete certification?')">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+
+                <button type="button" class="btn-add mt-2" onclick="document.getElementById('form-certification').style.display='block'; this.style.display='none';">+ Add Certification</button>
+                
+                <div class="add-form-container" id="form-certification">
+                    <h5 class="mb-3">Add Certification</h5>
+                    <form action="{{ url_for('student.add_certification') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Certification Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Issuing Organization</label>
+                            <input type="text" name="organization" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Issue Date</label>
+                                <input type="date" name="issue_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Date (Optional)</label>
+                                <input type="date" name="expiry_date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Certificate URL (Optional)</label>
+                            <input type="url" name="certificate_url" class="form-control">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Save Certification</button>
+                            <button type="button" class="btn btn-outline text-muted border-0" onclick="document.getElementById('form-certification').style.display='none'; document.querySelector('#certifications .btn-add').style.display='block';">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Simple JS to handle 'currently working'/'currently studying' checkboxes to disable end dates
+    document.getElementById('currently_studying')?.addEventListener('change', function() {
+        document.querySelector('input[name="end_year"]').disabled = this.checked;
+    });
+    
+    document.getElementById('currently_working')?.addEventListener('change', function() {
+        document.querySelector('input[name="end_date"]').disabled = this.checked;
+    });
+</script>
+{% endblock %}
+{% endblock %}

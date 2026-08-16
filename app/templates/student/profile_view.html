@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-header-card {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #3b82f6;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.completion-bar-container {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.completion-bar {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.section-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.skill-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 0.4rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0.25rem;
+    border: 1px solid #e2e8f0;
+}
+.skill-chip.advanced { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.skill-chip.intermediate { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.skill-chip.beginner { background: #fef9c3; color: #854d0e; border-color: #fef08a; }
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px dashed #cbd5e1;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3b82f6;
+}
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 20px;
+    bottom: -15px;
+    width: 2px;
+    background: #e2e8f0;
+}
+.timeline-item:last-child::after { display: none; }
+.timeline-item:last-child { margin-bottom: 0; }
+
+.role-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    
+    <!-- Profile Header -->
+    <div class="profile-header-card">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture }}" alt="Profile Picture" class="profile-avatar">
+                {% else %}
+                <div class="profile-avatar">
+                    {{ current_user.full_name[0] | upper }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="col">
+                <h1 class="mb-1" style="color: #0f172a; font-weight: 700;">{{ current_user.full_name }}</h1>
+                <p class="mb-2" style="color: #334155; font-size: 1.1rem;">
+                    {{ profile.headline or "Student at InternBridge" }}
+                </p>
+                <div class="d-flex align-items-center gap-3 text-muted" style="font-size: 0.9rem;">
+                    {% if profile.location %}
+                    <span>📍 {{ profile.location }}</span>
+                    {% endif %}
+                    {% if profile.phone %}
+                    <span>📞 {{ profile.phone }}</span>
+                    {% endif %}
+                    <span>✉️ {{ current_user.email }}</span>
+                </div>
+                
+                <div class="mt-4" style="max-width: 400px;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-sm font-weight-bold" style="color: #334155;">Profile Completion</span>
+                        <span class="text-sm font-weight-bold" style="color: #2563eb;">{{ completion_percentage }}%</span>
+                    </div>
+                    <div class="completion-bar-container">
+                        <div class="completion-bar" style="width: {{ completion_percentage }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto align-self-start">
+                <a href="{{ url_for('student.profile_edit') }}" class="btn btn-primary shadow-sm" style="background-color: #2563eb; border-color: #2563eb;">
+                    Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- About Me -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">About</h3>
+                </div>
+                {% if profile.about_me %}
+                    <p style="color: #475569; line-height: 1.6; white-space: pre-wrap;">{{ profile.about_me }}</p>
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Tell us about yourself</h4>
+                        <p class="text-muted mb-3">A professional introduction helps companies understand who you are.</p>
+                        <a href="{{ url_for('student.profile_edit') }}#about" class="btn btn-outline" style="border-color: #cbd5e1;">Add About Section</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Experience -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Experience</h3>
+                </div>
+                {% if profile.experience %}
+                    {% for exp in profile.experience|sort(attribute='start_date', reverse=True) %}
+                    <div class="timeline-item">
+                        <h5 class="mb-1" style="color: #0f172a; font-weight: 600;">{{ exp.job_title }}</h5>
+                        <p class="mb-1" style="color: #2563eb; font-weight: 500;">{{ exp.organization }}</p>
+                        <p class="text-muted mb-2" style="font-size: 0.875rem;">
+                            {{ exp.start_date.strftime('%b %Y') }} - 
+                            {% if exp.currently_working %} Present {% else %} {{ exp.end_date.strftime('%b %Y') if exp.end_date else 'Present' }} {% endif %}
+                        </p>
+                        {% if exp.description %}
+                        <p style="color: #475569; font-size: 0.95rem;">{{ exp.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Add your experience</h4>
+                        <p class="text-muted mb-3">Include internships, part-time work, or volunteer experience.</p>
+                        <a href="{{ url_for('student.profile_edit') }}#experience" class="btn btn-outline" style="border-color: #cbd5e1;">Add Experience</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Education -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Education</h3>
+                </div>
+                {% if profile.education %}
+                    {% for edu in profile.education|sort(attribute='start_year', reverse=True) %}
+                    <div class="timeline-item">
+                        <h5 class="mb-1" style="color: #0f172a; font-weight: 600;">{{ edu.degree }} in {{ edu.field_of_study }}</h5>
+                        <p class="mb-1" style="color: #2563eb; font-weight: 500;">{{ edu.institution }}</p>
+                        <p class="text-muted mb-0" style="font-size: 0.875rem;">
+                            {{ edu.start_year }} - {% if edu.currently_studying %} Present {% else %} {{ edu.end_year }} {% endif %}
+                            {% if edu.cgpa %}&nbsp;|&nbsp; CGPA/Percentage: {{ edu.cgpa }}{% endif %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Add your education</h4>
+                        <p class="text-muted mb-3">Where are you studying?</p>
+                        <a href="{{ url_for('student.profile_edit') }}#education" class="btn btn-outline" style="border-color: #cbd5e1;">Add Education</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Projects -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Projects</h3>
+                </div>
+                {% if profile.projects %}
+                    {% for project in profile.projects %}
+                    <div class="role-card mb-3 p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 style="color: #0f172a; font-weight: 600; margin-bottom: 0.5rem;">{{ project.name }}</h5>
+                            <div class="d-flex gap-2">
+                                {% if project.github_url %}
+                                <a href="{{ project.github_url }}" target="_blank" class="text-muted" title="GitHub">GitHub</a>
+                                {% endif %}
+                                {% if project.live_demo_url %}
+                                <a href="{{ project.live_demo_url }}" target="_blank" class="text-muted" title="Live Demo">Live Demo</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1rem;">{{ project.description }}</p>
+                        {% if project.technologies %}
+                        <div>
+                            <span class="text-muted" style="font-size: 0.85rem;">Technologies:</span>
+                            <span style="color: #334155; font-size: 0.85rem; font-weight: 500;">{{ project.technologies }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Showcase your projects</h4>
+                        <p class="text-muted mb-3">Add projects to help companies understand what you've built.</p>
+                        <a href="{{ url_for('student.profile_edit') }}#projects" class="btn btn-outline" style="border-color: #cbd5e1;">Add Project</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Certifications -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Certifications</h3>
+                </div>
+                {% if profile.certifications %}
+                    {% for cert in profile.certifications %}
+                    <div class="mb-3 border-bottom pb-3">
+                        <h5 class="mb-1" style="color: #0f172a; font-weight: 600;">{{ cert.name }}</h5>
+                        <p class="mb-1" style="color: #334155;">{{ cert.organization }}</p>
+                        <p class="text-muted mb-1" style="font-size: 0.875rem;">
+                            Issued: {{ cert.issue_date.strftime('%b %Y') }}
+                            {% if cert.expiry_date %} | Expires: {{ cert.expiry_date.strftime('%b %Y') }}{% endif %}
+                        </p>
+                        {% if cert.certificate_url %}
+                        <a href="{{ cert.certificate_url }}" target="_blank" style="font-size: 0.875rem; color: #2563eb;">View Certificate</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Add certifications</h4>
+                        <p class="text-muted mb-3">Show off your extra credentials.</p>
+                        <a href="{{ url_for('student.profile_edit') }}#certifications" class="btn btn-outline" style="border-color: #cbd5e1;">Add Certification</a>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Skills -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Skills</h3>
+                </div>
+                {% if profile.skills %}
+                    <div class="d-flex flex-wrap">
+                        {% for skill in profile.skills %}
+                        <div class="skill-chip {{ skill.proficiency|lower if skill.proficiency else '' }}">
+                            {{ skill.skill_name }}
+                            {% if skill.proficiency %}<span style="opacity: 0.6; margin-left: 5px; font-size: 0.75rem;">{{ skill.proficiency }}</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem; font-size: 1.1rem;">✦ Add skills</h4>
+                        <p class="text-muted mb-3" style="font-size: 0.9rem;">What tools do you know?</p>
+                        <a href="{{ url_for('student.profile_edit') }}#skills" class="btn btn-outline btn-sm" style="border-color: #cbd5e1;">Add Skills</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Career Preferences -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Career Goals</h3>
+                </div>
+                
+                <h6 style="color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Interested Roles</h6>
+                {% if profile.career_interests %}
+                    <div class="mb-4">
+                        {% for interest in profile.career_interests %}
+                        <div class="role-card d-inline-block mr-2 mb-2" style="border-left: 3px solid #3b82f6;">
+                            <span style="font-weight: 500; color: #1e293b;">{{ interest.role_name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">No roles selected.</p>
+                {% endif %}
+                
+                <h6 style="color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Work Mode</h6>
+                {% set modes = profile.get_work_modes() %}
+                {% if modes %}
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for mode in modes %}
+                        <span class="badge" style="background: #e2e8f0; color: #334155; font-weight: 500;">{{ mode }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Not specified.</p>
+                {% endif %}
+                
+                <a href="{{ url_for('student.profile_edit') }}#preferences" class="btn btn-outline btn-sm w-100" style="border-color: #cbd5e1;">Edit Goals</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
