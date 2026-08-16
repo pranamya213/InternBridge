@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Company Profile | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-header-card {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.company-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 1rem;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #3b82f6;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.completion-bar-container {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.completion-bar {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.section-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item h6 {
+    color: #64748b;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    color: #0f172a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0.25rem;
+    border: 1px solid #e2e8f0;
+}
+.chip.work-mode {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+.chip.domain {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px dashed #cbd5e1;
+}
+
+.link-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.link-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #2563eb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    
+    <!-- Profile Header -->
+    <div class="profile-header-card">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="company-logo">
+                    {{ profile.company_name[0] | upper if profile.company_name else "C" }}
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="mb-1" style="color: #0f172a; font-weight: 700;">{{ profile.company_name or "Company Name Pending" }}</h1>
+                <p class="mb-2" style="color: #334155; font-size: 1.1rem;">
+                    {{ profile.tagline or "No tagline provided yet." }}
+                </p>
+                <div class="d-flex align-items-center flex-wrap gap-3 text-muted" style="font-size: 0.9rem;">
+                    {% if profile.location %}
+                    <span>📍 {{ profile.location }}</span>
+                    {% endif %}
+                    {% if profile.organization_type or profile.industry %}
+                    <span>🏢 {{ [profile.organization_type, profile.industry]|select|join(' • ') }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-4" style="max-width: 400px;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-sm font-weight-bold" style="color: #334155;">Profile Completion</span>
+                        <span class="text-sm font-weight-bold" style="color: #2563eb;">{{ completion_percentage }}%</span>
+                    </div>
+                    <div class="completion-bar-container">
+                        <div class="completion-bar" style="width: {{ completion_percentage }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto align-self-start mt-3 mt-md-0">
+                <a href="{{ url_for('company.profile_edit') }}" class="btn btn-primary shadow-sm" style="background-color: #2563eb; border-color: #2563eb;">
+                    Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- About Company -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">About Company</h3>
+                </div>
+                {% if profile.about_company %}
+                    <p style="color: #475569; line-height: 1.6; white-space: pre-wrap;">{{ profile.about_company }}</p>
+                {% else %}
+                    <div class="empty-state">
+                        <h4 style="color: #64748b; margin-bottom: 0.5rem;">✦ Tell students about you</h4>
+                        <p class="text-muted mb-3">Add your company description to help candidates understand your organization.</p>
+                        <a href="{{ url_for('company.profile_edit') }}#about" class="btn btn-outline" style="border-color: #cbd5e1;">Add Description</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Company Information -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Company Information</h3>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h6>Industry</h6>
+                        <p>{{ profile.industry or "Not specified" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Company Size</h6>
+                        <p>{{ profile.company_size or "Not specified" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Founded Year</h6>
+                        <p>{{ profile.founded_year or "Not specified" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Organization Type</h6>
+                        <p>{{ profile.organization_type or "Not specified" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Areas of Work -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Areas of Work</h3>
+                </div>
+                {% set domains = profile.get_domains() %}
+                {% if domains %}
+                    <div class="d-flex flex-wrap">
+                        {% for domain in domains %}
+                        <span class="chip domain">{{ domain }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No areas of work specified.</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+            
+            <!-- Work Modes & Internships -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Hiring Preferences</h3>
+                </div>
+                
+                <h6 style="color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Work Modes Offered</h6>
+                {% set modes = profile.get_work_modes() %}
+                {% if modes %}
+                    <div class="d-flex flex-wrap mb-4">
+                        {% for mode in modes %}
+                        <span class="chip work-mode">✓ {{ mode }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Not specified.</p>
+                {% endif %}
+
+                <h6 style="color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Internship Preferences</h6>
+                <div class="info-item mb-2">
+                    <p style="font-size: 0.9rem;">Duration: <span style="font-weight: 400; color: #475569;">{{ profile.internship_duration or "Not specified" }}</span></p>
+                </div>
+                <div class="info-item mb-4">
+                    <p style="font-size: 0.9rem;">Availability: <span style="font-weight: 400; color: #475569;">{{ profile.internship_availability or "Not specified" }}</span></p>
+                </div>
+            </div>
+
+            <!-- Contact & Links -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="m-0" style="color: #1e293b;">Contact & Links</h3>
+                </div>
+                
+                {% if profile.website %}
+                <a href="{{ profile.website }}" target="_blank" class="link-item">
+                    <span>🌐</span> {{ profile.website }}
+                </a>
+                {% endif %}
+                
+                {% if profile.linkedin %}
+                <a href="{{ profile.linkedin }}" target="_blank" class="link-item">
+                    <span>💼</span> LinkedIn Profile
+                </a>
+                {% endif %}
+
+                {% if profile.github %}
+                <a href="{{ profile.github }}" target="_blank" class="link-item">
+                    <span>🐙</span> GitHub Profile
+                </a>
+                {% endif %}
+                
+                {% if profile.other_link %}
+                <a href="{{ profile.other_link }}" target="_blank" class="link-item">
+                    <span>🔗</span> Other Link
+                </a>
+                {% endif %}
+                
+                {% if not (profile.website or profile.linkedin or profile.github or profile.other_link) %}
+                <p class="text-muted" style="font-size: 0.9rem;">No professional links provided.</p>
+                {% endif %}
+
+                <hr class="my-4" style="border-color: #e2e8f0;">
+
+                <h6 style="color: #64748b; margin-bottom: 1rem; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Contact Person</h6>
+                {% if profile.contact_person_name or profile.contact_email %}
+                    <p class="mb-1" style="color: #0f172a; font-weight: 600;">{{ profile.contact_person_name or "Name not specified" }}</p>
+                    <p class="mb-2" style="color: #64748b; font-size: 0.85rem;">{{ profile.contact_person_role or "Role not specified" }}</p>
+                    <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 0.9rem; color: #334155;">
+                        <span>✉️</span> {{ profile.contact_email or current_user.email }}
+                    </div>
+                    {% if profile.contact_phone %}
+                    <div class="d-flex align-items-center gap-2" style="font-size: 0.9rem; color: #334155;">
+                        <span>📞</span> {{ profile.contact_phone }}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted" style="font-size: 0.9rem;">Contact person details pending.</p>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

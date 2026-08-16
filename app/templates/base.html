@@ -44,8 +44,10 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'student' %}
                             <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                            <a href="{{ url_for('student.profile_view') }}" class="btn btn-outline">My Profile</a>
                         {% elif current_user.role == 'company' %}
                             <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                            <a href="{{ url_for('company.profile_view') }}" class="btn btn-outline">My Company Profile</a>
                         {% elif current_user.role == 'admin' %}
                             <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Dashboard</a>
                         {% endif %}
