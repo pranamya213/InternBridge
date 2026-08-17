@@ -10,11 +10,41 @@ from datetime import datetime
 
 student_bp = Blueprint('student', __name__)
 
+from app.models.internship import Internship
+from app.services.matching_service import calculate_match
+
 @student_bp.route('/dashboard')
 @login_required
 @role_required('student')
 def dashboard():
-    return render_template('student/dashboard.html')
+    profile = get_or_create_profile(current_user.id)
+    
+    # Calculate profile completion dynamically
+    fields = [
+        profile.headline, profile.phone, profile.location, profile.about_me,
+        profile.education, profile.skills, profile.career_interests, 
+        profile.projects, profile.certifications, profile.experience, profile.professional_links
+    ]
+    completed_fields = sum(1 for field in fields if field)
+    completion_percentage = int((completed_fields / len(fields)) * 100) if fields else 0
+    
+    recommended_internships = []
+    
+    if completion_percentage >= 50:
+        # Fetch published internships and calculate scores
+        internships = Internship.query.filter_by(status='Published').all()
+        for i in internships:
+            i.match_data = calculate_match(profile, i)
+            i.match_score = i.match_data['score']
+            
+        # Sort by score descending and take top 5
+        internships.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
+        recommended_internships = internships[:5]
+        
+    return render_template('student/dashboard.html', 
+                           profile=profile, 
+                           completion_percentage=completion_percentage,
+                           recommended_internships=recommended_internships)
 
 # Helper to get or create profile
 def get_or_create_profile(user_id):

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Match Analysis: {{ internship.title }} | InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.match-analysis-header {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-radius: 1rem;
+    padding: 3rem;
+    position: relative;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.match-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+    position: relative;
+}
+.match-circle::before {
+    content: '';
+    position: absolute;
+    top: -5px; right: -5px; bottom: -5px; left: -5px;
+    border-radius: 50%;
+    background: conic-gradient(#3b82f6 {{ match_data.score }}%, #e2e8f0 0);
+    z-index: -1;
+}
+
+.match-score-text {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.match-category-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+    margin-bottom: 0.5rem;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    border: 1px solid rgba(255,255,255,0.4);
+    transition: transform 0.2s;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+}
+
+.skill-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.skill-chip.matched {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #34d399;
+}
+.skill-chip.missing {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #f87171;
+}
+.skill-chip.missing-pref {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fcd34d;
+}
+
+.icon-check { color: #059669; margin-right: 0.5rem; }
+.icon-warn { color: #dc2626; margin-right: 0.5rem; }
+.icon-opt { color: #d97706; margin-right: 0.5rem; }
+
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.insight-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    line-height: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="text-decoration-none" style="color: #64748b;">← Back to Internship Details</a>
+    </div>
+
+    <div class="match-analysis-header">
+        <div class="match-circle">
+            <div class="match-score-text">{{ match_data.score }}%</div>
+        </div>
+        <div class="match-category-text">{{ match_data.category }}</div>
+        <p class="text-muted mb-0" style="font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Here is a detailed breakdown of how your profile aligns with <strong>{{ internship.title }}</strong> at {{ internship.company.company_name }}.
+        </p>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Skills Breakdown -->
+        <div class="col-lg-7">
+            <div class="glass-card">
+                <h4 style="color: #0f172a; margin-bottom: 1.5rem;">Skill Alignment</h4>
+                
+                <h5 style="color: #334155; margin-bottom: 1rem;">Required Skills ({{ match_data.required_skills.percentage }}% Match)</h5>
+                <div class="mb-4">
+                    {% if not match_data.required_skills.matched and not match_data.required_skills.missing %}
+                        <p class="text-muted">No specific required skills listed.</p>
+                    {% else %}
+                        {% for skill in match_data.required_skills.matched %}
+                        <span class="skill-chip matched"><i class="icon-check">✓</i> {{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in match_data.required_skills.missing %}
+                        <span class="skill-chip missing"><i class="icon-warn">⚠</i> {{ skill }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <h5 style="color: #334155; margin-bottom: 1rem;">Preferred Skills</h5>
+                <div>
+                    {% if not match_data.preferred_skills.matched and not match_data.preferred_skills.missing %}
+                        <p class="text-muted">No specific preferred skills listed.</p>
+                    {% else %}
+                        {% for skill in match_data.preferred_skills.matched %}
+                        <span class="skill-chip matched"><i class="icon-check">✓</i> {{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in match_data.preferred_skills.missing %}
+                        <span class="skill-chip missing-pref"><i class="icon-opt">○</i> {{ skill }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="glass-card">
+                <h4 style="color: #0f172a; margin-bottom: 1.5rem;">Profile & Preferences</h4>
+                
+                <div class="insight-item">
+                    <div class="insight-icon">🎯</div>
+                    <div>
+                        <h6 style="font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">Career Interest</h6>
+                        <p class="mb-0 text-muted">
+                            {% if match_data.career_interest_match %}
+                            <span class="text-success"><i class="icon-check">✓</i></span> Your career interests align closely with this role.
+                            {% else %}
+                            <span class="text-warning"><i class="icon-opt">○</i></span> Your stated career interests don't perfectly match this domain.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <div class="insight-icon">🏠</div>
+                    <div>
+                        <h6 style="font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">Work Mode</h6>
+                        <p class="mb-0 text-muted">
+                            {% if match_data.work_mode_match == 'Match' %}
+                            <span class="text-success"><i class="icon-check">✓</i></span> {{ internship.work_mode }} matches your preference.
+                            {% elif match_data.work_mode_match == 'Mismatch' %}
+                            <span class="text-danger"><i class="icon-warn">⚠</i></span> {{ internship.work_mode }} differs from your preferred modes.
+                            {% else %}
+                            <span class="text-secondary"><i class="icon-opt">○</i></span> Neutral work mode alignment.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <div class="insight-icon">📍</div>
+                    <div>
+                        <h6 style="font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">Location</h6>
+                        <p class="mb-0 text-muted">
+                            {% if match_data.location_match == 'Match' %}
+                            <span class="text-success"><i class="icon-check">✓</i></span> Location aligns with your preferences.
+                            {% elif match_data.location_match == 'Mismatch' %}
+                            <span class="text-danger"><i class="icon-warn">⚠</i></span> Location ({{ internship.location }}) is outside your preferences.
+                            {% else %}
+                            <span class="text-secondary"><i class="icon-opt">○</i></span> Location alignment is neutral.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Insights & Recommendations -->
+        <div class="col-lg-5">
+            <div class="glass-card" style="background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);">
+                <h4 style="color: #0f172a; margin-bottom: 1.5rem;">Match Explanation</h4>
+                
+                {% for exp in match_data.explanation %}
+                <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">{{ exp }}</p>
+                {% endfor %}
+
+                {% if not match_data.explanation %}
+                <p style="color: #475569; font-size: 0.95rem;">You have a solid foundation for this opportunity.</p>
+                {% endif %}
+            </div>
+
+            {% if match_data.improvements %}
+            <div class="glass-card" style="border-left: 4px solid #3b82f6;">
+                <h4 style="color: #0f172a; margin-bottom: 1rem;">How to Improve</h4>
+                <ul class="mb-0" style="padding-left: 1.25rem; color: #475569; line-height: 1.6;">
+                    {% for imp in match_data.improvements %}
+                    <li style="margin-bottom: 0.5rem;">{{ imp }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="btn btn-primary btn-lg w-100 shadow-sm" style="border-radius: 2rem;">Return to Internship Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

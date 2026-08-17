@@ -16,6 +16,62 @@
         </div>
         
         <div class="row">
+            {% if completion_percentage < 50 %}
+            <div class="col-12 mb-4">
+                <div class="card p-4 text-center" style="border-radius: 1rem; border: 1px dashed #cbd5e1; background: #f8fafc;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+                    <h3 style="color: #1e293b;">Unlock Personalized Recommendations</h3>
+                    <p class="text-muted mb-4">Complete your profile to receive more accurate internship recommendations.</p>
+                    <div>
+                        <a href="{{ url_for('student.profile_edit') }}" class="btn btn-primary">Complete My Profile</a>
+                    </div>
+                </div>
+            </div>
+            {% elif recommended_internships %}
+            <div class="col-12 mb-5">
+                <div class="d-flex align-items-center mb-4">
+                    <h2 style="color: #0f172a; font-weight: 700; margin: 0;">✨ Recommended for You</h2>
+                    <p class="text-muted ms-3 mb-0" style="margin-top: 5px;">Based on your skills, interests and preferences.</p>
+                </div>
+                <div class="row">
+                    {% for internship in recommended_internships %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100" style="border-radius: 1rem; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden;">
+                            <div style="height: 6px; background: linear-gradient(90deg, #3b82f6, #0ea5e9);"></div>
+                            <div class="card-body p-4 position-relative">
+                                <div class="position-absolute" style="top: 15px; right: 15px;">
+                                    <span class="badge" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 2rem;">
+                                        ✦ {{ internship.match_score }}% Match
+                                    </span>
+                                </div>
+                                <h4 class="mb-1" style="font-weight: 700; margin-top: 1.5rem;"><a href="{{ url_for('internships.detail', internship_id=internship.id) }}" class="text-dark text-decoration-none">{{ internship.title }}</a></h4>
+                                <p class="text-muted mb-3">{{ internship.company.company_name }}</p>
+                                <div class="text-secondary" style="font-size: 0.9rem;">
+                                    {% if internship.location %}<div class="mb-1">📍 {{ internship.location }}</div>{% endif %}
+                                    {% if internship.work_mode %}<div class="mb-1">🏠 {{ internship.work_mode }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-2">
+                    <a href="{{ url_for('internships.index') }}?sort_by=recommended" class="btn btn-outline-primary" style="border-radius: 2rem; padding: 0.5rem 2rem;">Explore All Recommendations</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 mb-5">
+                <div class="card p-4 text-center" style="border-radius: 1rem; border: 1px dashed #cbd5e1; background: #f8fafc;">
+                    <h3 style="color: #1e293b;">We're still looking for your perfect match.</h3>
+                    <p class="text-muted mb-4">You can explore all available internships while improving the skills highlighted in your profile.</p>
+                    <div>
+                        <a href="{{ url_for('internships.index') }}" class="btn btn-outline-primary me-2">Explore All Internships</a>
+                        <a href="{{ url_for('student.profile_edit') }}" class="btn btn-outline-secondary">Improve My Skills</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="col-md-6 mb-4">
                 <div class="card p-4 h-100 text-center" style="border-radius: 1rem; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
                     <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>

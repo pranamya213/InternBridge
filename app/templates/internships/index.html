@@ -148,6 +148,9 @@
                         <label class="form-label" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Sort By</label>
                         <select name="sort_by" class="form-select form-select-sm" onchange="this.form.submit()">
                             <option value="newest" {% if request.args.get('sort_by') == 'newest' %}selected{% endif %}>Newest First</option>
+                            {% if current_user.is_authenticated and current_user.role == 'student' %}
+                            <option value="recommended" {% if request.args.get('sort_by') == 'recommended' %}selected{% endif %}>Recommended</option>
+                            {% endif %}
                             <option value="deadline_soonest" {% if request.args.get('sort_by') == 'deadline_soonest' %}selected{% endif %}>Deadline Soonest</option>
                             <option value="recently_updated" {% if request.args.get('sort_by') == 'recently_updated' %}selected{% endif %}>Recently Updated</option>
                         </select>
@@ -227,6 +230,14 @@
                                     </p>
                                 </div>
                             </div>
+
+                            {% if internship.match_data %}
+                            <div class="mb-3">
+                                <span class="badge" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 2rem;">
+                                    ✦ {{ internship.match_score }}% Match ({{ internship.match_data.category }})
+                                </span>
+                            </div>
+                            {% endif %}
 
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 {% if internship.location %}
