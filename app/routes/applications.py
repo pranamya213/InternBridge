@@ -6,6 +6,7 @@ from app.models.internship import Internship
 from app.models.student_profile import StudentProfile
 from app.models.company_profile import CompanyProfile
 from app.models.application import Application, ApplicationStatusHistory
+from app.services.matching_service import calculate_match, rank_candidates_for_internship
 from datetime import datetime
 
 applications_bp = Blueprint('applications', __name__)
@@ -134,12 +135,16 @@ def company_applicants(internship_id):
     internship = Internship.query.filter_by(id=internship_id, company_profile_id=company_profile.id).first_or_404()
     
     status_filter = request.args.get('status')
+    sort_by = request.args.get('sort_by', 'best_match')
     
     query = Application.query.filter_by(internship_id=internship.id)
     if status_filter and status_filter != 'All':
         query = query.filter_by(status=status_filter)
         
-    applications = query.order_by(Application.applied_at.desc()).all()
+    applications_raw = query.all()
+    
+    # Rank candidates
+    applications = rank_candidates_for_internship(internship, applications_raw, sort_by)
     
     stats = {
         'All': Application.query.filter_by(internship_id=internship.id).count(),
@@ -151,7 +156,7 @@ def company_applicants(internship_id):
         'Withdrawn': Application.query.filter_by(internship_id=internship.id, status='Withdrawn').count()
     }
     
-    return render_template('applications/company_applicants.html', internship=internship, applications=applications, current_filter=status_filter or 'All', stats=stats)
+    return render_template('applications/company_applicants.html', internship=internship, applications=applications, current_filter=status_filter or 'All', stats=stats, sort_by=sort_by)
 
 @applications_bp.route('/company/applications/<int:application_id>')
 @login_required
@@ -160,7 +165,10 @@ def company_applicant_detail(application_id):
     company_profile = CompanyProfile.query.filter_by(user_id=current_user.id).first_or_404()
     application = Application.query.join(Internship).filter(Application.id == application_id, Internship.company_profile_id == company_profile.id).first_or_404()
     
-    return render_template('applications/company_applicant_detail.html', application=application)
+    # Calculate match data
+    match_data = calculate_match(application.student, application.internship)
+    
+    return render_template('applications/company_applicant_detail.html', application=application, match_data=match_data)
 
 @applications_bp.route('/company/applications/<int:application_id>/status', methods=['POST'])
 @login_required
@@ -206,3 +214,33 @@ def company_update_notes(application_id):
     flash('Internal notes updated successfully.', 'success')
     
     return redirect(url_for('applications.company_applicant_detail', application_id=application.id))
+
+@applications_bp.route('/company/internships/<int:internship_id>/applications/compare')
+@login_required
+@role_required('company')
+def company_compare_candidates(internship_id):
+    company_profile = CompanyProfile.query.filter_by(user_id=current_user.id).first_or_404()
+    internship = Internship.query.filter_by(id=internship_id, company_profile_id=company_profile.id).first_or_404()
+    
+    # Get applicant IDs securely from query parameters
+    app_ids_str = request.args.get('ids', '')
+    if not app_ids_str:
+        flash("No candidates selected for comparison.", "warning")
+        return redirect(url_for('applications.company_applicants', internship_id=internship.id))
+        
+    try:
+        app_ids = [int(i.strip()) for i in app_ids_str.split(',') if i.strip()]
+    except ValueError:
+        abort(400, "Invalid application IDs.")
+        
+    # Securely fetch valid applications belonging to this internship and this company
+    applications = Application.query.filter(Application.id.in_(app_ids), Application.internship_id == internship.id).all()
+    
+    if len(applications) < 2:
+        flash("Please select at least 2 candidates to compare.", "warning")
+        return redirect(url_for('applications.company_applicants', internship_id=internship.id))
+        
+    # Run ranking logic on them to get match data populated
+    applications = rank_candidates_for_internship(internship, applications, sort_by='best_match')
+    
+    return render_template('applications/company_candidate_compare.html', internship=internship, applications=applications)

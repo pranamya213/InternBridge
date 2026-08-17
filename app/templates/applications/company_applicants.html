@@ -44,71 +44,174 @@
             </div>
         </div>
         
-        <!-- Filters -->
-        <div class="d-flex overflow-auto mb-4" style="gap: 0.5rem; white-space: nowrap; padding-bottom: 0.25rem;">
-            {% for status, count in stats.items() %}
-            <a href="{{ url_for('applications.company_applicants', internship_id=internship.id, status=status if status != 'All' else None) }}" 
-               class="btn btn-sm {% if current_filter == status %}btn-primary shadow-sm{% else %}bg-white border-light text-secondary{% endif %}"
-               style="border-radius: 20px; padding: 0.4rem 1.25rem; font-weight: 500;">
-                {{ status }} <span class="badge {% if current_filter == status %}bg-white text-primary{% else %}bg-light text-secondary border{% endif %} rounded-pill ms-2">{{ count }}</span>
-            </a>
-            {% endfor %}
+        <!-- Filters & Sorting -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+            <div class="d-flex overflow-auto" style="gap: 0.5rem; white-space: nowrap; padding-bottom: 0.25rem;">
+                {% for status, count in stats.items() %}
+                <a href="{{ url_for('applications.company_applicants', internship_id=internship.id, status=status if status != 'All' else None, sort_by=sort_by) }}" 
+                   class="btn btn-sm {% if current_filter == status %}btn-primary shadow-sm{% else %}bg-white border-light text-secondary{% endif %}"
+                   style="border-radius: 20px; padding: 0.4rem 1.25rem; font-weight: 500;">
+                    {{ status }} <span class="badge {% if current_filter == status %}bg-white text-primary{% else %}bg-light text-secondary border{% endif %} rounded-pill ms-2">{{ count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+            
+            <div>
+                <form method="GET" action="{{ url_for('applications.company_applicants', internship_id=internship.id) }}" class="d-flex align-items-center gap-2">
+                    {% if current_filter != 'All' %}
+                    <input type="hidden" name="status" value="{{ current_filter }}">
+                    {% endif %}
+                    <label class="text-muted" style="font-size: 0.85rem; font-weight: 600; white-space: nowrap;">Sort By</label>
+                    <select name="sort_by" class="form-select form-select-sm" style="border-radius: 20px; width: auto;" onchange="this.form.submit()">
+                        <option value="best_match" {% if sort_by == 'best_match' %}selected{% endif %}>Best Match</option>
+                        <option value="application_date" {% if sort_by == 'application_date' %}selected{% endif %}>Application Date</option>
+                        <option value="profile_completion" {% if sort_by == 'profile_completion' %}selected{% endif %}>Profile Completion</option>
+                    </select>
+                </form>
+            </div>
         </div>
         
-        <!-- Applicants List -->
-        {% if applications %}
-            <div class="row">
-                {% for app in applications %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="premium-card h-100 d-flex flex-column" style="position: relative; overflow: hidden; border-radius: 1rem;">
-                        
-                        <!-- Status Accent Strip -->
-                        {% set color_map = {'Applied': '#3b82f6', 'Under Review': '#8b5cf6', 'Shortlisted': '#06b6d4', 'Accepted': '#10b981', 'Rejected': '#ef4444', 'Withdrawn': '#64748b'} %}
-                        <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: {{ color_map[app.status] }};"></div>
-                        
-                        <div class="p-4 flex-grow-1 ps-5">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <h4 class="mb-1" style="color: #0f172a; font-weight: 700; font-size: 1.15rem;">{{ app.student.user.full_name }}</h4>
-                                    <p class="mb-2 text-muted text-truncate" style="font-size: 0.9rem; max-width: 200px;">{{ app.student.headline or 'Student' }}</p>
-                                </div>
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #64748b; font-weight: bold;">
-                                    {{ app.student.user.full_name[0] }}
-                                </div>
+        <!-- Recommended Candidates -->
+        {% if applications and current_filter == 'All' and sort_by == 'best_match' %}
+        <div class="mb-5">
+            <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 1.5rem;"><span style="color: #3b82f6;">✦</span> Recommended Candidates</h4>
+            <div class="row g-4">
+                {% for app in applications[:3] %}
+                <div class="col-lg-4">
+                    <div class="premium-card p-4 h-100" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-top: 4px solid #3b82f6; border-radius: 1rem;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem;">{{ app.student.user.full_name }}</h5>
+                                <p class="text-muted mb-0" style="font-size: 0.85rem;">{{ app.student.headline }}</p>
                             </div>
-                            
-                            <div class="mb-3">
-                                <span class="status-badge status-{{ app.status|lower|replace(' ', '-') }}">{{ app.status }}</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                {% set skills = app.student.skills %}
-                                {% if skills %}
-                                    <div class="d-flex flex-wrap gap-1">
-                                        {% for skill in skills[:3] %}
-                                        <span style="font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; color: #475569;">{{ skill.skill_name }}</span>
-                                        {% endfor %}
-                                        {% if skills|length > 3 %}
-                                        <span style="font-size: 0.75rem; color: #64748b; padding: 2px 4px;">+{{ skills|length - 3 }}</span>
-                                        {% endif %}
-                                    </div>
-                                {% else %}
-                                    <span class="text-muted" style="font-size: 0.8rem;">No skills listed</span>
+                            <span class="badge" style="background: #e0f2fe; color: #0284c7; padding: 0.5rem 0.8rem; font-size: 0.85rem; border-radius: 2rem;">
+                                {{ app.match_score }}% {{ app.match_data.category }}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p style="font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">Required Skills Matched</p>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for skill in app.match_data.required_skills.matched[:3] %}
+                                <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">✓ {{ skill }}</span>
+                                {% endfor %}
+                                {% if app.match_data.required_skills.matched|length > 3 %}
+                                <span style="font-size: 0.75rem; color: #64748b; padding: 2px 4px;">+{{ app.match_data.required_skills.matched|length - 3 }}</span>
+                                {% endif %}
+                                {% if not app.match_data.required_skills.matched %}
+                                <span class="text-muted fst-italic" style="font-size: 0.75rem;">None</span>
                                 {% endif %}
                             </div>
-                            
-                            <div class="text-muted" style="font-size: 0.85rem;">
-                                Applied: {{ app.applied_at.strftime('%b %d, %Y') }}
-                            </div>
                         </div>
                         
-                        <div class="p-3 bg-light border-top d-flex gap-2" style="border-color: #f1f5f9 !important;">
-                            <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm flex-grow-1" style="border-radius: 6px;">View Profile</a>
-                        </div>
+                        <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-primary btn-sm w-100" style="border-radius: 2rem;">View Candidate</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+        </div>
+        {% endif %}
+        
+        <!-- Applicants List -->
+        <!-- Applicants List Form for Comparison -->
+        {% if applications %}
+            <form id="compareForm" action="{{ url_for('applications.company_compare_candidates', internship_id=internship.id) }}" method="GET">
+                <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 1.5rem;">All Applicants</h4>
+                <div class="row">
+                    {% for app in applications %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="premium-card h-100 d-flex flex-column" style="position: relative; overflow: hidden; border-radius: 1rem;">
+                            
+                            <!-- Status Accent Strip -->
+                            {% set color_map = {'Applied': '#3b82f6', 'Under Review': '#8b5cf6', 'Shortlisted': '#06b6d4', 'Accepted': '#10b981', 'Rejected': '#ef4444', 'Withdrawn': '#64748b'} %}
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background-color: {{ color_map[app.status] }};"></div>
+                            
+                            <!-- Compare Checkbox -->
+                            <div style="position: absolute; top: 15px; right: 15px;">
+                                <input type="checkbox" name="ids" value="{{ app.id }}" class="form-check-input compare-checkbox" style="width: 1.2rem; height: 1.2rem;">
+                            </div>
+                            
+                            <div class="p-4 flex-grow-1 ps-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h4 class="mb-1" style="color: #0f172a; font-weight: 700; font-size: 1.15rem;">{{ app.student.user.full_name }}</h4>
+                                        <p class="mb-2 text-muted text-truncate" style="font-size: 0.9rem; max-width: 180px;">{{ app.student.headline or 'Student' }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="status-badge status-{{ app.status|lower|replace(' ', '-') }}">{{ app.status }}</span>
+                                    <span class="badge" style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; border-radius: 2rem;">{{ app.match_score }}% Match</span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <span style="font-size: 0.8rem; color: #475569;">Profile: <strong>{{ app.profile_completion }}%</strong> complete</span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {% set skills = app.student.skills %}
+                                    {% if skills %}
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for skill in skills[:3] %}
+                                            <span style="font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; color: #475569;">{{ skill.skill_name }}</span>
+                                            {% endfor %}
+                                            {% if skills|length > 3 %}
+                                            <span style="font-size: 0.75rem; color: #64748b; padding: 2px 4px;">+{{ skills|length - 3 }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted" style="font-size: 0.8rem;">No skills listed</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="text-muted" style="font-size: 0.85rem;">
+                                    Applied: {{ app.applied_at.strftime('%b %d, %Y') }}
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-light border-top d-flex gap-2" style="border-color: #f1f5f9 !important;">
+                                <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm flex-grow-1" style="border-radius: 6px;">View Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Floating Compare Button -->
+                <div id="compareActionBox" style="display: none; position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background: white; padding: 1rem 1.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; align-items: center; gap: 1rem;">
+                    <span id="compareCountText" style="font-weight: 600; color: #0f172a;">0 selected</span>
+                    <button type="submit" id="compareSubmitBtn" class="btn btn-primary" style="border-radius: 2rem;" disabled>Compare Candidates</button>
+                </div>
+            </form>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const checkboxes = document.querySelectorAll('.compare-checkbox');
+                    const compareBox = document.getElementById('compareActionBox');
+                    const compareCountText = document.getElementById('compareCountText');
+                    const compareSubmitBtn = document.getElementById('compareSubmitBtn');
+                    
+                    checkboxes.forEach(cb => {
+                        cb.addEventListener('change', function() {
+                            const checkedCount = document.querySelectorAll('.compare-checkbox:checked').length;
+                            if (checkedCount > 0) {
+                                compareBox.style.display = 'flex';
+                                compareCountText.innerText = `${checkedCount} selected`;
+                                if (checkedCount >= 2 && checkedCount <= 5) {
+                                    compareSubmitBtn.disabled = false;
+                                } else if (checkedCount > 5) {
+                                    compareCountText.innerText = `Max 5 selected`;
+                                    compareSubmitBtn.disabled = true;
+                                } else {
+                                    compareSubmitBtn.disabled = true;
+                                }
+                            } else {
+                                compareBox.style.display = 'none';
+                            }
+                        });
+                    });
+                });
+            </script>
         {% else %}
             <!-- Empty State -->
             <div class="glass-card text-center py-5">

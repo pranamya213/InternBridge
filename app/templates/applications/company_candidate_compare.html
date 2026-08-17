@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Candidates | InternBridge{% endblock %}
+
+{% block content %}
+<div class="bg-premium-gradient py-4" style="min-height: calc(100vh - 70px);">
+    <div class="ib-container">
+        
+        <div class="mb-4">
+            <a href="{{ url_for('applications.company_applicants', internship_id=internship.id) }}" class="text-decoration-none" style="color: #64748b; font-weight: 500;">
+                ← Back to Applicants for {{ internship.title }}
+            </a>
+        </div>
+        
+        <div class="premium-card p-4 mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <h3 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem;">Candidate Comparison</h3>
+            <p class="text-muted mb-0">Comparing {{ applications|length }} candidates for {{ internship.title }}</p>
+        </div>
+        
+        <!-- Desktop Comparison Table (Hidden on small screens) -->
+        <div class="d-none d-lg-block premium-card overflow-hidden mb-5">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0" style="border-color: #e2e8f0;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th class="p-3" style="width: 15%; color: #475569; font-weight: 600;">Factor</th>
+                            {% for app in applications %}
+                            <th class="p-3 text-center" style="width: {{ 85 / applications|length }}%;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #0ea5e9; font-weight: bold; margin: 0 auto 0.5rem auto;">
+                                    {{ app.student.user.full_name[0] }}
+                                </div>
+                                <h5 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">{{ app.student.user.full_name }}</h5>
+                                <p class="text-muted mb-2" style="font-size: 0.8rem; font-weight: 500;">{{ app.student.headline or 'Student' }}</p>
+                                <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm" style="border-radius: 2rem; font-size: 0.75rem;">View Profile</a>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Overall Match</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span style="font-size: 1.5rem; font-weight: 800; color: #1e293b; line-height: 1;">{{ app.match_score }}%</span>
+                                    <span class="badge mt-2" style="background: #e0f2fe; color: #0369a1;">{{ app.match_data.category }}</span>
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Required Skills</td>
+                            {% for app in applications %}
+                            <td class="p-3 align-middle">
+                                <div class="text-center mb-2">
+                                    <span style="font-weight: 700; color: #0f172a;">{{ app.match_data.required_skills.matched|length }}</span> <span class="text-muted" style="font-size: 0.85rem;">/ {{ app.match_data.required_skills.matched|length + app.match_data.required_skills.missing|length }}</span>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                                    {% for skill in app.match_data.required_skills.matched[:3] %}
+                                    <span class="chip" style="background: #ecfdf5; color: #059669; font-size: 0.7rem; padding: 2px 6px;">✓ {{ skill }}</span>
+                                    {% endfor %}
+                                    {% if app.match_data.required_skills.matched|length > 3 %}
+                                    <span style="font-size: 0.7rem; color: #64748b;">+{{ app.match_data.required_skills.matched|length - 3 }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Preferred Skills</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                <span style="font-weight: 700; color: #0f172a;">{{ app.match_data.preferred_skills.matched|length }}</span> <span class="text-muted" style="font-size: 0.85rem;">/ {{ app.match_data.preferred_skills.matched|length + app.match_data.preferred_skills.missing|length }}</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Career Alignment</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                {% if app.match_data.career_interest_match %}
+                                <span style="color: #059669; font-weight: 500;">Strong</span>
+                                {% else %}
+                                <span style="color: #64748b; font-weight: 500;">Moderate</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Work Mode</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                {% if app.match_data.work_mode_match == 'Match' %}
+                                <span style="color: #059669;">Match</span>
+                                {% else %}
+                                <span style="color: #dc2626;">Mismatch</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Location</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                {% if app.match_data.location_match == 'Match' %}
+                                <span style="color: #059669;">Match</span>
+                                {% else %}
+                                <span style="color: #f59e0b;">Partial</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td class="p-3 align-middle" style="font-weight: 600; color: #334155;">Profile Completion</td>
+                            {% for app in applications %}
+                            <td class="p-3 text-center align-middle">
+                                <span style="font-weight: 600; color: #0f172a;">{{ app.profile_completion }}%</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Mobile/Tablet Stacked Comparison (Hidden on large screens) -->
+        <div class="d-lg-none row g-4 mb-5">
+            {% for app in applications %}
+            <div class="col-md-6">
+                <div class="premium-card p-4 h-100" style="border-top: 4px solid #3b82f6;">
+                    <div class="text-center mb-4">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #0ea5e9; font-weight: bold; margin: 0 auto 0.75rem auto;">
+                            {{ app.student.user.full_name[0] }}
+                        </div>
+                        <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 0.25rem;">{{ app.student.user.full_name }}</h4>
+                        <p class="text-muted mb-3" style="font-size: 0.85rem;">{{ app.student.headline or 'Student' }}</p>
+                        
+                        <div class="d-flex flex-column align-items-center mb-3">
+                            <span style="font-size: 2rem; font-weight: 800; color: #1e293b; line-height: 1;">{{ app.match_score }}%</span>
+                            <span class="badge mt-2" style="background: #e0f2fe; color: #0369a1;">{{ app.match_data.category }}</span>
+                        </div>
+                        
+                        <a href="{{ url_for('applications.company_applicant_detail', application_id=app.id) }}" class="btn btn-outline-primary btn-sm w-100" style="border-radius: 2rem;">View Profile</a>
+                    </div>
+                    
+                    <hr style="border-color: #e2e8f0; margin: 1.5rem 0;">
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Required Skills</span>
+                        <span style="font-weight: 700; color: #0f172a;">{{ app.match_data.required_skills.matched|length }} / {{ app.match_data.required_skills.matched|length + app.match_data.required_skills.missing|length }}</span>
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Preferred Skills</span>
+                        <span style="font-weight: 700; color: #0f172a;">{{ app.match_data.preferred_skills.matched|length }} / {{ app.match_data.preferred_skills.matched|length + app.match_data.preferred_skills.missing|length }}</span>
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Career Alignment</span>
+                        {% if app.match_data.career_interest_match %}
+                        <span style="color: #059669; font-weight: 500;">Strong</span>
+                        {% else %}
+                        <span style="color: #64748b; font-weight: 500;">Moderate</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Work Mode</span>
+                        {% if app.match_data.work_mode_match == 'Match' %}
+                        <span style="color: #059669;">Match</span>
+                        {% else %}
+                        <span style="color: #dc2626;">Mismatch</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Location</span>
+                        {% if app.match_data.location_match == 'Match' %}
+                        <span style="color: #059669;">Match</span>
+                        {% else %}
+                        <span style="color: #f59e0b;">Partial</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span style="color: #475569; font-weight: 600;">Profile Completion</span>
+                        <span style="font-weight: 700; color: #0f172a;">{{ app.profile_completion }}%</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

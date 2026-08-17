@@ -16,6 +16,93 @@
             <!-- Left Column: Profile & Cover Letter -->
             <div class="col-lg-8 mb-4">
                 
+                <!-- Candidate Match Analysis -->
+                <div class="premium-card p-4 mb-4" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #3b82f6;">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+                        <div>
+                            <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;"><span style="color: #3b82f6;">✦</span> CANDIDATE MATCH ANALYSIS</h4>
+                            <div class="d-flex align-items-center gap-3">
+                                <span style="font-size: 2.5rem; font-weight: 800; color: #1e293b; line-height: 1;">{{ match_data.score }}%</span>
+                                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 1rem; padding: 0.5rem 1rem; border-radius: 2rem;">{{ match_data.category }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <h6 style="color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Required Skills</h6>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">{{ match_data.required_skills.matched|length }} / {{ match_data.required_skills.matched|length + match_data.required_skills.missing|length }}</span>
+                                <span class="text-muted" style="font-size: 0.9rem;">Matched</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for skill in match_data.required_skills.matched %}
+                                <span class="chip" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">✓ {{ skill }}</span>
+                                {% endfor %}
+                                {% for skill in match_data.required_skills.missing %}
+                                <span class="chip" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">⚠ {{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 style="color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Preferred Skills</h6>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">{{ match_data.preferred_skills.matched|length }} / {{ match_data.preferred_skills.matched|length + match_data.preferred_skills.missing|length }}</span>
+                                <span class="text-muted" style="font-size: 0.9rem;">Matched</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for skill in match_data.preferred_skills.matched %}
+                                <span class="chip" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">✓ {{ skill }}</span>
+                                {% endfor %}
+                                {% for skill in match_data.preferred_skills.missing %}
+                                <span class="chip" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">- {{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3" style="background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                <h6 style="color: #475569; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem;">Career Alignment</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if match_data.career_interest_match %}
+                                    <span style="color: #059669; font-size: 1.1rem;">✓</span> <span style="color: #1e293b; font-weight: 500; font-size: 0.9rem;">Strong alignment</span>
+                                    {% else %}
+                                    <span style="color: #dc2626; font-size: 1.1rem;">⚠</span> <span style="color: #1e293b; font-weight: 500; font-size: 0.9rem;">Different focus</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3" style="background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                <h6 style="color: #475569; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem;">Work Mode</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if match_data.work_mode_match == 'Match' %}
+                                    <span style="color: #059669; font-size: 1.1rem;">✓</span> <span style="color: #1e293b; font-weight: 500; font-size: 0.9rem;">Preference matches</span>
+                                    {% else %}
+                                    <span style="color: #dc2626; font-size: 1.1rem;">⚠</span> <span style="color: #1e293b; font-weight: 500; font-size: 0.9rem;">Mismatch</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3" style="background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                <h6 style="color: #475569; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem;">Eligibility</h6>
+                                <div class="d-flex align-items-start gap-2">
+                                    {% if match_data.eligibility.status == 'Likely Eligible' %}
+                                    <span style="color: #059669; font-size: 1.1rem; line-height: 1;">✓</span>
+                                    {% else %}
+                                    <span style="color: #dc2626; font-size: 1.1rem; line-height: 1;">⚠</span>
+                                    {% endif %}
+                                    <span style="color: #1e293b; font-weight: 500; font-size: 0.85rem; line-height: 1.2;">{{ match_data.eligibility.status }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
                 <!-- Profile Header Card -->
                 <div class="premium-card p-4 mb-4">
                     <div class="d-flex align-items-center gap-4 mb-3">
@@ -129,6 +216,49 @@
             
             <!-- Right Column: Status & Notes -->
             <div class="col-lg-4">
+                
+                <!-- Recruitment Decision Support -->
+                <div class="premium-card p-4 mb-4" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span style="font-size: 1.2rem;">💡</span>
+                        <h5 style="color: #166534; font-weight: 700; margin-bottom: 0;">Recruiter Insights</h5>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 style="color: #15803d; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Candidate Strengths</h6>
+                        <ul style="color: #166534; font-size: 0.9rem; padding-left: 1.2rem; margin-bottom: 0;">
+                            {% if match_data.required_skills.percentage >= 80 %}
+                            <li>Strong coverage of required technical skills.</li>
+                            {% endif %}
+                            {% if match_data.career_interest_match %}
+                            <li>Career interests align closely with this role.</li>
+                            {% endif %}
+                            {% if match_data.work_mode_match == 'Match' %}
+                            <li>Comfortable with the required work mode.</li>
+                            {% endif %}
+                            {% if match_data.preferred_skills.matched %}
+                            <li>Possesses {{ match_data.preferred_skills.matched|length }} preferred skills.</li>
+                            {% endif %}
+                            {% if match_data.score > 85 %}
+                            <li>Highly recommended candidate overall.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    {% if match_data.improvements %}
+                    <div>
+                        <h6 style="color: #b45309; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Improvement Areas</h6>
+                        <ul style="color: #92400e; font-size: 0.9rem; padding-left: 1.2rem; margin-bottom: 0;">
+                            {% for imp in match_data.improvements[:3] %}
+                            <li>{{ imp }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <hr style="border-color: #bbf7d0; margin: 1rem 0;">
+                    <p class="text-muted mb-0" style="font-size: 0.75rem; font-style: italic;">Note: The system provides recommendations based on profile data. The final recruitment decision belongs to your team.</p>
+                </div>
                 
                 <!-- Status Control -->
                 <div class="premium-card p-4 mb-4">

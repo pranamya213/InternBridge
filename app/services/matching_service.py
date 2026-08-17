@@ -208,3 +208,34 @@ def calculate_match(student_profile, internship):
         'improvements': improvements,
         'explanation': explanation
     }
+
+def rank_candidates_for_internship(internship, applications, sort_by='best_match'):
+    """
+    Ranks applications for a given internship using the existing matching logic.
+    Returns a list of applications augmented with `match_data` and sorted by the requested criteria.
+    """
+    for app in applications:
+        # Calculate the match for each application's student profile
+        app.match_data = calculate_match(app.student, internship)
+        app.match_score = app.match_data['score']
+        
+        # Calculate profile completion percentage for tie-breaking
+        profile = app.student
+        fields = [
+            profile.headline, profile.phone, profile.location, profile.about_me,
+            profile.education, profile.skills, profile.career_interests, 
+            profile.projects, profile.certifications, profile.experience, profile.professional_links
+        ]
+        completed_fields = sum(1 for field in fields if field)
+        app.profile_completion = int((completed_fields / len(fields)) * 100) if fields else 0
+
+    # Sorting
+    if sort_by == 'best_match':
+        # 1. Match score (descending), 2. Profile completion (descending), 3. Application date (ascending/earliest)
+        applications.sort(key=lambda x: (x.match_score, x.profile_completion, -x.applied_at.timestamp()), reverse=True)
+    elif sort_by == 'application_date':
+        applications.sort(key=lambda x: x.applied_at, reverse=True)
+    elif sort_by == 'profile_completion':
+        applications.sort(key=lambda x: x.profile_completion, reverse=True)
+        
+    return applications

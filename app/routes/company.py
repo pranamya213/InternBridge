@@ -42,13 +42,24 @@ def dashboard():
         
         # Calculate applicant stats
         from app.models.application import Application
+        from app.services.matching_service import calculate_match
+        
         all_apps = Application.query.join(Internship).filter(Internship.company_profile_id == profile.id).all()
         applicant_stats['total'] = len(all_apps)
         applicant_stats['new'] = sum(1 for a in all_apps if a.status == 'Applied')
         applicant_stats['reviewing'] = sum(1 for a in all_apps if a.status == 'Under Review')
         applicant_stats['shortlisted'] = sum(1 for a in all_apps if a.status == 'Shortlisted')
         
-    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats, applicant_stats=applicant_stats)
+        top_candidates = []
+        if all_apps:
+            for app in all_apps:
+                app.match_data = calculate_match(app.student, app.internship)
+                app.match_score = app.match_data['score']
+                
+            all_apps.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
+            top_candidates = all_apps[:3]
+        
+    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats, applicant_stats=applicant_stats, top_candidates=top_candidates)
 
 @company_bp.route('/profile')
 @login_required
