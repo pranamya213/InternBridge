@@ -11,6 +11,8 @@ from datetime import datetime
 student_bp = Blueprint('student', __name__)
 
 from app.models.internship import Internship
+from app.models.application import Application
+from app.models.interview import Interview
 from app.services.matching_service import calculate_match
 
 @student_bp.route('/dashboard')
@@ -41,10 +43,17 @@ def dashboard():
         internships.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
         recommended_internships = internships[:5]
         
+    # Get upcoming interviews
+    upcoming_interviews = Interview.query.join(Application).filter(
+        Application.student_profile_id == profile.id,
+        Interview.status == 'Scheduled'
+    ).order_by(Interview.scheduled_date.asc(), Interview.start_time.asc()).all()
+        
     return render_template('student/dashboard.html', 
                            profile=profile, 
                            completion_percentage=completion_percentage,
-                           recommended_internships=recommended_internships)
+                           recommended_internships=recommended_internships,
+                           upcoming_interviews=upcoming_interviews)
 
 # Helper to get or create profile
 def get_or_create_profile(user_id):

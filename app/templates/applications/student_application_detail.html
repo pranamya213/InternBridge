@@ -60,6 +60,32 @@
             
             <div class="col-lg-4">
                 
+                {% if application.interviews %}
+                    {% set latest_interview = application.interviews[-1] %}
+                    <div class="premium-card p-4 mb-4" style="border: 1px solid rgba(14, 165, 233, 0.2); background: linear-gradient(145deg, #ffffff, #f0f7ff);">
+                        <h5 class="mb-3" style="color: #0284c7; font-weight: 600;">📅 Interview {{ latest_interview.status }}</h5>
+                        
+                        <div class="mb-3">
+                            <div style="font-weight: 600; color: #0f172a;">{{ latest_interview.scheduled_date.strftime('%B %d, %Y') }}</div>
+                            <div class="text-muted">{{ latest_interview.start_time.strftime('%I:%M %p') }} - {{ latest_interview.end_time.strftime('%I:%M %p') }}</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div style="font-size: 0.9rem; color: #475569;">Type: <strong>{{ latest_interview.interview_type }}</strong></div>
+                            <div style="font-size: 0.9rem; color: #475569;">Your Response: 
+                                <strong>
+                                    {% if latest_interview.student_response == 'Pending' %}<span class="text-warning">Pending</span>
+                                    {% elif latest_interview.student_response == 'Accepted' %}<span class="text-success">Accepted</span>
+                                    {% elif latest_interview.student_response == 'Declined' %}<span class="text-danger">Declined</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+                        
+                        <a href="{{ url_for('interviews.student_interview_detail', interview_id=latest_interview.id) }}" class="btn btn-primary btn-sm w-100">View Details</a>
+                    </div>
+                {% endif %}
+                
                 <!-- Timeline Card -->
                 <div class="premium-card p-4">
                     <h5 class="mb-4" style="color: #0f172a; font-weight: 600;">Application Timeline</h5>
@@ -67,10 +93,20 @@
                     <div class="timeline-container">
                         {% for history in application.status_history %}
                         <div class="timeline-item">
-                            <div class="timeline-dot {% if loop.last %}current{% else %}completed{% endif %}"></div>
+                            <div class="timeline-dot {% if loop.last and not application.interviews %}current{% else %}completed{% endif %}"></div>
                             <div class="timeline-content">
                                 <h6 style="color: #1e293b; font-weight: 600; margin-bottom: 0.25rem;">{{ history.status }}</h6>
                                 <p class="text-muted mb-0" style="font-size: 0.85rem;">{{ history.created_at.strftime('%B %d, %Y - %I:%M %p') }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for interview in application.interviews %}
+                        <div class="timeline-item">
+                            <div class="timeline-dot {% if loop.last and interview.status == 'Scheduled' %}current{% else %}completed{% endif %}" style="background-color: #0284c7;"></div>
+                            <div class="timeline-content">
+                                <h6 style="color: #0284c7; font-weight: 600; margin-bottom: 0.25rem;">Interview {{ interview.status }}</h6>
+                                <p class="text-muted mb-0" style="font-size: 0.85rem;">{{ interview.scheduled_date.strftime('%B %d, %Y') }}</p>
                             </div>
                         </div>
                         {% endfor %}

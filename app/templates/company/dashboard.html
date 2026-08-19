@@ -153,6 +153,77 @@
         </div>
         {% endif %}
 
+        <div class="row mt-2">
+            <!-- Recent Recruitment Activity -->
+            <div class="col-md-6 mb-4">
+                <div class="premium-card p-4 h-100" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 style="color: #0f172a; font-weight: 700; margin: 0;">Recent Activity</h4>
+                        <a href="{{ url_for('notifications.index') }}" class="btn btn-link btn-sm text-decoration-none">View All</a>
+                    </div>
+                    
+                    {% if recent_activity %}
+                        <div class="timeline-container ps-2" style="border-left: 2px solid #e2e8f0; margin-left: 10px;">
+                            {% for activity in recent_activity %}
+                            <div class="position-relative mb-4 ps-4">
+                                <div class="position-absolute" style="left: -24px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: {% if not activity.is_read %}#3b82f6{% else %}#cbd5e1{% endif %};"></div>
+                                <h6 class="mb-1" style="color: #1e293b; font-weight: 600; font-size: 0.95rem;">{{ activity.title }}</h6>
+                                <p class="text-muted mb-1" style="font-size: 0.85rem; line-height: 1.4;">{{ activity.message }}</p>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ activity.created_at.strftime('%b %d, %I:%M %p') }}</span>
+                                {% if activity.link %}
+                                <div class="mt-2">
+                                    <a href="{{ activity.link }}" class="btn btn-sm btn-outline-primary" style="padding: 0.1rem 0.5rem; font-size: 0.75rem;">View Details</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent activity.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Interviews -->
+            <div class="col-md-6 mb-4">
+                <div class="premium-card p-4 h-100" style="background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); border: 1px solid #bae6fd;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 style="color: #0f172a; font-weight: 700; margin: 0;">Upcoming Interviews</h4>
+                        <a href="{{ url_for('interviews.company_interviews') }}" class="btn btn-link btn-sm text-decoration-none">View All</a>
+                    </div>
+                    
+                    {% if upcoming_interviews %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for interview in upcoming_interviews %}
+                            <div class="p-3 rounded" style="background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h6 class="mb-0" style="color: #0284c7; font-weight: 600;">{{ interview.application.student.user.full_name }}</h6>
+                                    <span class="badge {% if interview.student_response == 'Accepted' %}bg-success{% elif interview.student_response == 'Declined' %}bg-danger{% else %}bg-warning{% endif %}" style="font-size: 0.7rem;">
+                                        {{ interview.student_response }}
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-2" style="font-size: 0.8rem;">Applying for: {{ interview.application.internship.title }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted" style="font-size: 0.8rem;">
+                                        <span class="me-2">📅 {{ interview.scheduled_date.strftime('%b %d') }}</span>
+                                        <span>⏰ {{ interview.start_time.strftime('%I:%M %p') }}</span>
+                                    </div>
+                                    <a href="{{ url_for('interviews.company_interview_detail', interview_id=interview.id) }}" class="text-primary text-decoration-none" style="font-size: 0.85rem; font-weight: 500;">Manage →</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center p-4">
+                            <div style="font-size: 2.5rem; opacity: 0.5; margin-bottom: 1rem;">📅</div>
+                            <p class="text-muted">No upcoming interviews scheduled.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
     </div>
 </section>
 {% endblock %}

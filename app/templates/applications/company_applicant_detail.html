@@ -293,6 +293,37 @@
                     {% endif %}
                 </div>
                 
+                <!-- Interview Control -->
+                <div class="premium-card p-4 mb-4">
+                    <h5 style="color: #0f172a; font-weight: 600; margin-bottom: 1rem;">Interview</h5>
+                    
+                    {% if application.interviews %}
+                        {% set latest_interview = application.interviews[-1] %}
+                        <div class="mb-3 p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-bold" style="color: #0f172a;">{{ latest_interview.status }}</span>
+                                <span class="badge 
+                                    {% if latest_interview.student_response == 'Pending' %}bg-warning
+                                    {% elif latest_interview.student_response == 'Accepted' %}bg-success
+                                    {% elif latest_interview.student_response == 'Declined' %}bg-danger
+                                    {% endif %}">
+                                    {{ latest_interview.student_response }}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #475569;">
+                                <div>📅 {{ latest_interview.scheduled_date.strftime('%b %d, %Y') }}</div>
+                                <div>⏰ {{ latest_interview.start_time.strftime('%I:%M %p') }}</div>
+                            </div>
+                            <a href="{{ url_for('interviews.company_interview_detail', interview_id=latest_interview.id) }}" class="btn btn-outline-primary btn-sm w-100 mt-3">Manage Interview</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-3" style="font-size: 0.9rem;">No interview scheduled for this applicant.</p>
+                        {% if application.status not in ['Rejected', 'Withdrawn'] %}
+                            <a href="{{ url_for('interviews.company_create_interview', application_id=application.id) }}" class="btn btn-primary w-100" style="border-radius: 0.5rem;">Schedule Interview</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
                 <!-- Private Notes -->
                 <div class="premium-card p-4" style="background: #fffbeb; border-color: #fde68a;">
                     <div class="d-flex align-items-center gap-2 mb-3">

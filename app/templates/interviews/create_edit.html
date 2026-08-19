@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{% if interview %}Edit Interview{% else %}Schedule Interview{% endif %} - InternBridge{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4" style="max-width: 800px;">
+    
+    <div class="mb-4">
+        <a href="{{ url_for('applications.company_applicant_detail', application_id=application.id) }}" class="text-decoration-none text-muted">← Back to Applicant</a>
+    </div>
+
+    <div class="card p-5" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
+        <h2 class="mb-1">{% if interview %}Edit Interview{% else %}Schedule Interview{% endif %}</h2>
+        <p class="text-muted mb-4">Candidate: <strong>{{ application.student.user.full_name }}</strong> | Internship: <strong>{{ application.internship.title }}</strong></p>
+
+        <form method="POST">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <label class="form-label">Interview Type</label>
+                    <select name="interview_type" id="interview_type" class="form-control" required onchange="toggleFields()">
+                        <option value="Online" {% if interview and interview.interview_type == 'Online' %}selected{% endif %}>Online Video Call</option>
+                        <option value="Offline" {% if interview and interview.interview_type == 'Offline' %}selected{% endif %}>In-Person (Offline)</option>
+                        <option value="Phone" {% if interview and interview.interview_type == 'Phone' %}selected{% endif %}>Phone Call</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">Date</label>
+                    <input type="date" name="scheduled_date" class="form-control" required value="{{ interview.scheduled_date.strftime('%Y-%m-%d') if interview else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Start Time</label>
+                    <input type="time" name="start_time" class="form-control" required value="{{ interview.start_time.strftime('%H:%M') if interview else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Time</label>
+                    <input type="time" name="end_time" class="form-control" required value="{{ interview.end_time.strftime('%H:%M') if interview else '' }}">
+                </div>
+            </div>
+
+            <div class="row mb-4" id="link_group">
+                <div class="col-md-12">
+                    <label class="form-label">Meeting Link</label>
+                    <input type="url" name="meeting_link" class="form-control" placeholder="https://meet.google.com/..." value="{{ interview.meeting_link if interview else '' }}">
+                    <div class="form-text">Required for Online interviews.</div>
+                </div>
+            </div>
+
+            <div class="row mb-4" id="location_group" style="display: none;">
+                <div class="col-md-12">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="location" class="form-control" placeholder="Office Address or Room Number" value="{{ interview.location if interview else '' }}">
+                    <div class="form-text">Required for In-Person interviews.</div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <label class="form-label">Instructions for Candidate (Optional)</label>
+                    <textarea name="instructions" class="form-control" rows="3" placeholder="Any preparation needed, who they will meet, etc.">{{ interview.instructions if interview else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <label class="form-label">Private Company Notes (Optional)</label>
+                    <textarea name="company_notes" class="form-control" rows="2" placeholder="Notes for interviewers, visible only to company">{{ interview.company_notes if interview else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <a href="{{ url_for('applications.company_applicant_detail', application_id=application.id) }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">{% if interview %}Update Interview{% else %}Schedule Interview{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function toggleFields() {
+    var type = document.getElementById('interview_type').value;
+    var linkGroup = document.getElementById('link_group');
+    var locationGroup = document.getElementById('location_group');
+    var linkInput = document.querySelector('input[name="meeting_link"]');
+    var locationInput = document.querySelector('input[name="location"]');
+
+    if (type === 'Online') {
+        linkGroup.style.display = 'block';
+        locationGroup.style.display = 'none';
+        linkInput.required = true;
+        locationInput.required = false;
+    } else if (type === 'Offline') {
+        linkGroup.style.display = 'none';
+        locationGroup.style.display = 'block';
+        linkInput.required = false;
+        locationInput.required = true;
+    } else {
+        linkGroup.style.display = 'none';
+        locationGroup.style.display = 'none';
+        linkInput.required = false;
+        locationInput.required = false;
+    }
+}
+
+// Run on load
+document.addEventListener("DOMContentLoaded", toggleFields);
+</script>
+{% endblock %}
+
+{% endblock %}

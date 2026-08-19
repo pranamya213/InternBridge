@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.notifications-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.notification-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.mark-all-form {
+    margin: 0;
+}
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    background: var(--surface-color, #ffffff);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.notification-card.unread {
+    background: linear-gradient(145deg, #ffffff, #f0f7ff);
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification-card.unread::before {
+    content: '';
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--primary-color);
+    margin-right: 1.5rem;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-color);
+}
+
+.notification-message {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.notification-meta {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container">
+    <div class="notifications-container">
+        <div class="notification-header">
+            <h2>Notifications</h2>
+            {% if unread_notifications_count > 0 %}
+            <form action="{{ url_for('notifications.mark_all_read') }}" method="POST" class="mark-all-form">
+                <button type="submit" class="btn btn-outline btn-sm">Mark All as Read</button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% if notifications %}
+            <div class="notification-list">
+                {% for notification in notifications %}
+                <div class="notification-wrapper">
+                    {% if notification.is_read %}
+                        <a href="{% if notification.link %}{{ notification.link }}{% else %}#{% endif %}" class="notification-card">
+                    {% else %}
+                        <form action="{{ url_for('notifications.mark_read', notification_id=notification.id) }}" method="POST" class="w-100 m-0">
+                            <button type="submit" class="notification-card unread w-100 text-start border-0">
+                    {% endif %}
+                    
+                        <div class="notification-icon">
+                            {% if 'interview' in notification.notification_type %}
+                                📅
+                            {% elif 'high_match' in notification.notification_type %}
+                                ⭐
+                            {% elif 'accepted' in notification.notification_type or 'accepted' in notification.title|lower %}
+                                🎉
+                            {% elif 'rejected' in notification.title|lower %}
+                                📝
+                            {% else %}
+                                🔔
+                            {% endif %}
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">{{ notification.title }}</div>
+                            <div class="notification-message">{{ notification.message }}</div>
+                            <div class="notification-meta">{{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                        </div>
+                        
+                    {% if notification.is_read %}
+                        </a>
+                    {% else %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>No Notifications Yet</h3>
+                <p class="text-muted">You're all caught up! New updates will appear here.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

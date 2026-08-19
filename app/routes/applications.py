@@ -7,6 +7,9 @@ from app.models.student_profile import StudentProfile
 from app.models.company_profile import CompanyProfile
 from app.models.application import Application, ApplicationStatusHistory
 from app.services.matching_service import calculate_match, rank_candidates_for_internship
+from app.services.notification_service import (
+    notify_application_submitted, notify_application_status_change, notify_high_match_candidate
+)
 from datetime import datetime
 
 applications_bp = Blueprint('applications', __name__)
@@ -59,6 +62,15 @@ def student_apply(internship_id):
         db.session.commit()
         
         flash('Your application has been submitted successfully!', 'success')
+        
+        # Trigger notifications
+        notify_application_submitted(application)
+        
+        # Calculate match and notify if high match
+        match_data = calculate_match(student_profile, internship)
+        if match_data['score'] >= 80:
+            notify_high_match_candidate(application, match_data['score'])
+            
         return redirect(url_for('applications.student_application_detail', application_id=application.id))
         
     return render_template('applications/student_apply.html', internship=internship, student_profile=student_profile)
@@ -197,6 +209,9 @@ def company_update_status(application_id):
         )
         db.session.add(history)
         db.session.commit()
+        
+        notify_application_status_change(application)
+        
         flash(f'Application status updated to {new_status}.', 'success')
         
     return redirect(url_for('applications.company_applicant_detail', application_id=application.id))

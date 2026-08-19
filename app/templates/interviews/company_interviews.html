@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Management - InternBridge{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-header {
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(14,165,233,0.1) 0%, rgba(59,130,246,0.1) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filters-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.interview-card {
+    background: var(--surface-color, #ffffff);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.interview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.candidate-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.candidate-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.meta-group {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-scheduled { background: #e0f2fe; color: #0284c7; }
+.status-completed { background: #dcfce7; color: #16a34a; }
+.status-cancelled { background: #fee2e2; color: #dc2626; }
+
+.response-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid currentColor;
+}
+.resp-pending { color: #f59e0b; background: rgba(245,158,11,0.1); }
+.resp-accepted { color: #10b981; background: rgba(16,185,129,0.1); }
+.resp-declined { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ib-container py-4">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="mb-2">Interview Management</h1>
+            <p class="text-muted mb-0">Schedule and manage interviews across all your internships.</p>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <a href="{{ url_for('interviews.company_interviews', status='All') }}" class="filter-btn {% if current_filter == 'All' %}active{% endif %}">All</a>
+        <a href="{{ url_for('interviews.company_interviews', status='Upcoming') }}" class="filter-btn {% if current_filter == 'Upcoming' %}active{% endif %}">Upcoming</a>
+        <a href="{{ url_for('interviews.company_interviews', status='Pending Response') }}" class="filter-btn {% if current_filter == 'Pending Response' %}active{% endif %}">Pending Response</a>
+        <a href="{{ url_for('interviews.company_interviews', status='Completed') }}" class="filter-btn {% if current_filter == 'Completed' %}active{% endif %}">Completed</a>
+        <a href="{{ url_for('interviews.company_interviews', status='Cancelled') }}" class="filter-btn {% if current_filter == 'Cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if interviews %}
+        {% for interview in interviews %}
+        <div class="interview-card">
+            <div class="interview-row">
+                <div class="candidate-info">
+                    <div class="candidate-avatar">
+                        {{ interview.application.student.user.full_name[:1] }}
+                    </div>
+                    <div>
+                        <h4 class="mb-1">{{ interview.application.student.user.full_name }}</h4>
+                        <div class="text-muted small">Applying for: <strong>{{ interview.application.internship.title }}</strong></div>
+                    </div>
+                </div>
+                
+                <div class="meta-group">
+                    <div>
+                        <div>📅 {{ interview.scheduled_date.strftime('%b %d, %Y') }}</div>
+                        <div>⏰ {{ interview.start_time.strftime('%I:%M %p') }}</div>
+                    </div>
+                    <div>
+                        <div>📍 {{ interview.interview_type }}</div>
+                        <div class="mt-1">
+                            Response: 
+                            <span class="response-badge 
+                                {% if interview.student_response == 'Pending' %}resp-pending
+                                {% elif interview.student_response == 'Accepted' %}resp-accepted
+                                {% elif interview.student_response == 'Declined' %}resp-declined
+                                {% endif %}">
+                                {{ interview.student_response }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-column gap-2 align-items-end">
+                    <span class="status-badge 
+                        {% if interview.status == 'Scheduled' %}status-scheduled
+                        {% elif interview.status == 'Completed' %}status-completed
+                        {% elif interview.status == 'Cancelled' %}status-cancelled
+                        {% endif %}">
+                        {{ interview.status }}
+                    </span>
+                    <a href="{{ url_for('interviews.company_interview_detail', interview_id=interview.id) }}" class="btn btn-outline btn-sm">Manage</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;">📅</div>
+            <h3>No Interviews Found</h3>
+            <p class="text-muted">There are no interviews matching your current filter.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

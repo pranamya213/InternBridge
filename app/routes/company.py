@@ -42,7 +42,9 @@ def dashboard():
         
         # Calculate applicant stats
         from app.models.application import Application
-        from app.services.matching_service import calculate_match
+        from app.models.interview import Interview
+        from app.models.notification import Notification
+        from app.services.matching_service import rank_candidates_for_internship
         
         all_apps = Application.query.join(Internship).filter(Internship.company_profile_id == profile.id).all()
         applicant_stats['total'] = len(all_apps)
@@ -53,13 +55,39 @@ def dashboard():
         top_candidates = []
         if all_apps:
             for app in all_apps:
+                from app.services.matching_service import calculate_match
                 app.match_data = calculate_match(app.student, app.internship)
                 app.match_score = app.match_data['score']
                 
             all_apps.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
             top_candidates = all_apps[:3]
         
-    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats, applicant_stats=applicant_stats, top_candidates=top_candidates)
+        # Get recent recruitment activity (notifications)
+        recent_activity = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
+        
+        # Get upcoming interviews
+        upcoming_interviews = Interview.query.join(Application).join(Internship).filter(
+            Internship.company_profile_id == profile.id,
+            Interview.status == 'Scheduled'
+        ).order_by(Interview.scheduled_date.asc(), Interview.start_time.asc()).limit(5).all()
+        
+        # Also update applicant_stats with interviews count for display
+        interviews_scheduled = Interview.query.join(Application).join(Internship).filter(
+            Internship.company_profile_id == profile.id,
+            Interview.status == 'Scheduled'
+        ).count()
+        applicant_stats['interviews_scheduled'] = interviews_scheduled
+
+        return render_template('company/dashboard.html',
+                               profile=profile,
+                               completion_percentage=completion_percentage,
+                               stats=internships_stats,
+                               applicant_stats=applicant_stats,
+                               top_candidates=top_candidates,
+                               recent_activity=recent_activity,
+                               upcoming_interviews=upcoming_interviews)
+    
+    return render_template('company/dashboard.html', profile=profile, completion_percentage=completion_percentage, stats=internships_stats, applicant_stats=applicant_stats, top_candidates=[])
 
 @company_bp.route('/profile')
 @login_required

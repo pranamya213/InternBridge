@@ -50,6 +50,12 @@ def create_app(config_name='default'):
     from app.routes.errors import errors_bp
     app.register_blueprint(errors_bp)
     
+    from app.routes.notifications import notifications_bp
+    app.register_blueprint(notifications_bp)
+    
+    from app.routes.interviews import interviews_bp
+    app.register_blueprint(interviews_bp)
+    
     # Ensure instance folder exists
     import os
     try:
@@ -61,5 +67,15 @@ def create_app(config_name='default'):
     with app.app_context():
         from app import models  # Ensure models are imported
         db.create_all()
+
+    # Context processor for global unread notifications count
+    @app.context_processor
+    def inject_unread_notifications():
+        from flask_login import current_user
+        from app.models.notification import Notification
+        if current_user.is_authenticated:
+            unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+            return dict(unread_notifications_count=unread_count)
+        return dict(unread_notifications_count=0)
 
     return app
