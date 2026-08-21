@@ -3,19 +3,152 @@
 {% block title %}Admin Dashboard | InternBridge{% endblock %}
 
 {% block content %}
-<section class="dashboard-section pt-5">
+<section class="dashboard-section pt-5 pb-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%); min-height: calc(100vh - 80px);">
     <div class="ib-container">
-        <div class="dashboard-header mb-5">
-            <h1>Welcome to InternBridge Admin</h1>
-            <p class="text-secondary">System Administration Dashboard</p>
+        <div class="dashboard-header mb-5 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 style="color: #0f172a; font-weight: 800;">Platform Overview</h1>
+                <p class="text-secondary mb-0" style="font-size: 1.1rem;">Manage InternBridge users, content, and external integrations</p>
+            </div>
         </div>
         
-        <div class="dashboard-placeholder card-gradient-border">
-            <div class="placeholder-content text-center py-5">
-                <div class="role-icon-large mb-3">🛡️</div>
-                <h3>Admin Control Panel</h3>
-                <p>This is a placeholder to verify role-based access.</p>
-                <p>In the next phase, this will include user management, company verification, and system analytics.</p>
+        <!-- Users & Activity -->
+        <h3 class="mb-4" style="color: #1e293b; font-weight: 700;">Users & Activity</h3>
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div style="font-size: 2.5rem;">👨‍🎓</div>
+                        <h2 style="color: #3b82f6; font-weight: 800; font-size: 3rem; margin: 0;">{{ total_students }}</h2>
+                    </div>
+                    <h5 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;">Students</h5>
+                    <p class="text-muted mb-0">Total registered student profiles</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div style="font-size: 2.5rem;">🏢</div>
+                        <h2 style="color: #8b5cf6; font-weight: 800; font-size: 3rem; margin: 0;">{{ total_companies }}</h2>
+                    </div>
+                    <h5 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;">Companies</h5>
+                    <p class="text-muted mb-0">Total registered company profiles</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div style="font-size: 2.5rem;">👥</div>
+                        <h2 style="color: #10b981; font-weight: 800; font-size: 3rem; margin: 0;">{{ total_users }}</h2>
+                    </div>
+                    <h5 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;">Total Users</h5>
+                    <p class="text-muted mb-0">All registered platform users</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Platform Opportunities -->
+        <h3 class="mb-4" style="color: #1e293b; font-weight: 700;">Platform Opportunities</h3>
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <h4 class="mb-4" style="color: #0f172a; font-weight: 700;">Internal Internships (Companies)</h4>
+                    <div class="d-flex gap-4">
+                        <div class="flex-fill p-3 rounded" style="background: rgba(255,255,255,0.8);">
+                            <p class="text-muted mb-1" style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Published</p>
+                            <h3 style="color: #2563eb; font-weight: 800; margin: 0;">{{ published_internal }}</h3>
+                        </div>
+                        <div class="flex-fill p-3 rounded" style="background: rgba(255,255,255,0.8);">
+                            <p class="text-muted mb-1" style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Total Active</p>
+                            <h3 style="color: #0f172a; font-weight: 800; margin: 0;">{{ total_internal }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <h4 class="mb-4" style="color: #0f172a; font-weight: 700;">Recruitment Activity</h4>
+                    <div class="d-flex gap-4">
+                        <div class="flex-fill p-3 rounded" style="background: rgba(255,255,255,0.8);">
+                            <p class="text-muted mb-1" style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Applications</p>
+                            <h3 style="color: #e11d48; font-weight: 800; margin: 0;">{{ total_applications }}</h3>
+                        </div>
+                        <div class="flex-fill p-3 rounded" style="background: rgba(255,255,255,0.8);">
+                            <p class="text-muted mb-1" style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Interviews</p>
+                            <h3 style="color: #f59e0b; font-weight: 800; margin: 0;">{{ total_interviews }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- External Discovery Sync -->
+        <h3 class="mb-4" style="color: #1e293b; font-weight: 700;">External Discovery Sync</h3>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 0.5rem;">External Data Management</h4>
+                            <p class="text-muted mb-0">Automatically discover and aggregate internships from configured external providers (e.g. Arbeitnow).</p>
+                        </div>
+                        <form action="{{ url_for('admin.sync_external_internships_route') }}" method="POST">
+                            <button type="submit" class="btn btn-primary shadow-sm" style="font-weight: 600; border-radius: 2rem; background: linear-gradient(135deg, #2563eb, #0ea5e9); border: none; padding: 0.75rem 1.5rem;">
+                                🔄 Sync Now
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 rounded text-center h-100" style="background: rgba(255,255,255,0.9);">
+                                <h3 style="color: #3b82f6; font-weight: 800; margin-bottom: 0;">{{ total_external }}</h3>
+                                <p class="text-muted small mb-0 fw-bold">Total Fetched</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 rounded text-center h-100" style="background: rgba(255,255,255,0.9);">
+                                <h3 style="color: #10b981; font-weight: 800; margin-bottom: 0;">{{ published_external }}</h3>
+                                <p class="text-muted small mb-0 fw-bold">Active</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 rounded text-center h-100" style="background: rgba(255,255,255,0.9);">
+                                <h3 style="color: #f59e0b; font-weight: 800; margin-bottom: 0;">{{ draft_external }}</h3>
+                                <p class="text-muted small mb-0 fw-bold">Drafts</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 rounded text-center h-100" style="background: rgba(255,255,255,0.9);">
+                                <h3 style="color: #64748b; font-weight: 800; margin-bottom: 0;">{{ closed_external + archived_external }}</h3>
+                                <p class="text-muted small mb-0 fw-bold">Closed/Archived</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mt-4 mt-md-0">
+                <div class="card p-4 h-100" style="border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.03); background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                    <h4 class="mb-4" style="color: #0f172a; font-weight: 700;">System Status</h4>
+                    
+                    <div class="mb-4">
+                        <p class="text-muted mb-1 fw-bold" style="font-size: 0.85rem; text-transform: uppercase;">Last Synchronization</p>
+                        <p class="mb-0" style="color: #0f172a; font-size: 1.1rem; font-weight: 600;">
+                            {% if last_sync %}
+                                🟢 {{ last_sync.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+                            {% else %}
+                                🔴 Never synced
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('admin.external_internships') }}" class="btn btn-outline-dark w-100 fw-bold" style="border-radius: 0.5rem; border-width: 2px;">
+                            Manage External Opportunities
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

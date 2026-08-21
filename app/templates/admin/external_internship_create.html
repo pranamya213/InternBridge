@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Add External Internship | InternBridge Admin{% endblock %}
+
+{% block content %}
+<section class="pt-5 pb-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%); min-height: calc(100vh - 80px);">
+    <div class="ib-container">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{{ url_for('admin.external_internships') }}" class="text-decoration-none text-muted mb-2 d-inline-block">← Back to Listings</a>
+                <h2 style="color: #0f172a; font-weight: 700;">Add External Internship</h2>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin.external_internship_create') }}" class="needs-validation">
+            <!-- Internship Info -->
+            <div class="card mb-4" style="border-radius: 1rem; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <h5 class="mb-0" style="font-weight: 600; color: #1e293b;">1. Basic Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Internship Title *</label>
+                            <input type="text" name="title" class="form-control bg-light" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Company Name *</label>
+                            <input type="text" name="company_name" class="form-control bg-light" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Short Description</label>
+                            <input type="text" name="short_description" class="form-control bg-light" placeholder="One-line summary">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Category / Domain</label>
+                            <input type="text" name="category" class="form-control bg-light" placeholder="e.g., Software Engineering">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Internship Type</label>
+                            <select name="internship_type" class="form-select bg-light">
+                                <option value="Internship">Internship</option>
+                                <option value="Part-time Internship">Part-time Internship</option>
+                                <option value="Full-time Internship">Full-time Internship</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Work Mode</label>
+                            <select name="work_mode" class="form-select bg-light">
+                                <option value="Remote">Remote</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="On-site">On-site</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Info -->
+            <div class="card mb-4" style="border-radius: 1rem; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <h5 class="mb-0" style="font-weight: 600; color: #1e293b;">2. Application Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Application URL (External) *</label>
+                            <input type="url" name="application_url" class="form-control bg-light" placeholder="https://..." required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Application Deadline *</label>
+                            <input type="date" name="application_deadline" class="form-control bg-light" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Source Name</label>
+                            <input type="text" name="source_name" class="form-control bg-light" placeholder="e.g., LinkedIn, Company Careers" value="Admin Curated">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Source URL</label>
+                            <input type="url" name="source_url" class="form-control bg-light" placeholder="Optional">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Description *</label>
+                            <textarea name="description" class="form-control bg-light" rows="5" required></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skills & Details -->
+            <div class="card mb-4" style="border-radius: 1rem; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <h5 class="mb-0" style="font-weight: 600; color: #1e293b;">3. Requirements & Skills</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Required Skills</label>
+                            <input type="text" name="required_skills" class="form-control bg-light" placeholder="Comma separated (e.g. Python, SQL)">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Preferred Skills</label>
+                            <input type="text" name="preferred_skills" class="form-control bg-light" placeholder="Comma separated">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Location</label>
+                            <input type="text" name="location" class="form-control bg-light" placeholder="e.g. New York, Remote">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Duration</label>
+                            <input type="text" name="duration" class="form-control bg-light" placeholder="e.g. 6 Months">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Stipend Type</label>
+                            <select name="stipend_type" class="form-select bg-light">
+                                <option value="Paid">Paid</option>
+                                <option value="Unpaid">Unpaid</option>
+                                <option value="Performance-based">Performance-based</option>
+                                <option value="Negotiable">Negotiable</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Stipend Amount</label>
+                            <input type="text" name="stipend" class="form-control bg-light" placeholder="e.g. ₹15,000/month">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Eligibility</label>
+                            <input type="text" name="eligibility" class="form-control bg-light" placeholder="e.g. B.Tech 3rd Year">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4" style="border-radius: 1rem; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="form-label fw-bold mb-1">Status</label>
+                        <select name="status" class="form-select bg-light" style="width: auto;">
+                            <option value="Draft">Draft</option>
+                            <option value="Published">Published</option>
+                            <option value="Closed">Closed</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #2563eb, #0ea5e9); border: none; border-radius: 0.5rem;">Save Internship</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

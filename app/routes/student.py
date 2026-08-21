@@ -33,15 +33,28 @@ def dashboard():
     recommended_internships = []
     
     if completion_percentage >= 50:
-        # Fetch published internships and calculate scores
-        internships = Internship.query.filter_by(status='Published').all()
-        for i in internships:
+        # Fetch published internships from both sources
+        today = datetime.utcnow().date()
+        internal = Internship.query.filter_by(status='Published').filter(db.or_(Internship.application_deadline >= today, Internship.application_deadline == None)).all()
+        for i in internal:
+            i.is_external = False
+            i.display_company_name = i.company.company_name
+            
+        from app.models.external_internship import ExternalInternship
+        external = ExternalInternship.query.filter_by(status='Published').filter(db.or_(ExternalInternship.application_deadline >= today, ExternalInternship.application_deadline == None)).all()
+        for i in external:
+            i.is_external = True
+            i.display_company_name = i.company_name
+            
+        all_internships = internal + external
+        
+        for i in all_internships:
             i.match_data = calculate_match(profile, i)
             i.match_score = i.match_data['score']
             
         # Sort by score descending and take top 5
-        internships.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
-        recommended_internships = internships[:5]
+        all_internships.sort(key=lambda x: getattr(x, 'match_score', 0), reverse=True)
+        recommended_internships = all_internships[:5]
         
     # Get upcoming interviews
     upcoming_interviews = Interview.query.join(Application).filter(

@@ -163,15 +163,62 @@ def calculate_match(student_profile, internship):
     # 5. Location (5%)
     student_locations = student_profile.get_locations() if student_profile else []
     int_loc = internship.location
+    int_country = getattr(internship, 'country', None)
+    int_state = getattr(internship, 'state', None)
+    
+    # Simple heuristic to extract student state/country from their JSON preferences
+    # e.g., if they selected "Bengaluru, Karnataka, India"
+    student_states = []
+    student_countries = []
+    
+    # Let's map any obvious ones
+    for sl in student_locations:
+        sl_lower = sl.lower()
+        if 'karnataka' in sl_lower or 'bengaluru' in sl_lower or 'bangalore' in sl_lower:
+            student_states.append('Karnataka')
+            student_countries.append('India')
+        if 'india' in sl_lower:
+            student_countries.append('India')
+            
     location_match = "Neutral"
     
-    if int_loc and student_locations:
-        if int_loc in student_locations or "Remote" in student_locations and int_mode == "Remote":
-            score += WEIGHTS['location']
-            location_match = "Match"
+    if int_mode == "Remote" and "Remote" in student_locations:
+        score += WEIGHTS['location']
+        location_match = "Match (Remote)"
+    elif int_loc and student_locations:
+        # Check explicit exact match first
+        if int_loc in student_locations:
+            score += WEIGHTS['location'] # 5/5
+            location_match = "Strong Match"
         else:
-            score += (WEIGHTS['location'] * 0.2)
-            location_match = "Mismatch"
+            # Intelligent fallback
+            loc_matched = False
+            for sl in student_locations:
+                if sl.lower() in int_loc.lower() or int_loc.lower() in sl.lower():
+                    score += WEIGHTS['location'] # 5/5
+                    location_match = "Strong Match"
+                    loc_matched = True
+                    break
+            
+            if not loc_matched:
+                if int_state and int_state in student_states:
+                    score += (WEIGHTS['location'] * 0.8) # 4/5
+                    location_match = "State Match"
+                elif int_country and int_country in student_countries:
+                    if int_country == 'India':
+                        score += (WEIGHTS['location'] * 0.6) # 3/5
+                        location_match = "Country Match"
+                    else:
+                        score += (WEIGHTS['location'] * 0.2) # 1/5
+                        location_match = "Weak Match"
+                elif not int_country and not int_state:
+                    # Unknown
+                    score += (WEIGHTS['location'] * 0.4) # 2/5
+                    location_match = "Unknown"
+                else:
+                    # Known mismatch
+                    score += 0 # 0/5
+                    location_match = "Mismatch"
     else:
         score += (WEIGHTS['location'] * 0.5)
 
